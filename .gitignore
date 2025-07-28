@@ -19,6 +19,7 @@ logs/
 .cache-loader/
 __pycache__/
 *.pyc
+alembic/*.pyc
 
 # OS generated files
 .DS_Store
