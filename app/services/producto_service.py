@@ -63,9 +63,19 @@ class ProductoService(BaseService):
             self.db.refresh(producto_simple)
             
             logger.info(f"✅ Producto simple completo creado para artículo {id_articulo}")
+            # Crear un stock vacío para el producto simple
+            stock = Stock(
+                id_producto_simple=producto.id,
+                cantidad_actual=Decimal('0')
+            )
+            self.db.add(stock)
+            self.db.commit()
+            self.db.refresh(stock)
+
             return {
                 'producto': producto,
-                'producto_simple': producto_simple
+                'producto_simple': producto_simple,
+                'stock': stock
             }
             
         except SQLAlchemyError as e:

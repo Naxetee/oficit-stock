@@ -10,7 +10,7 @@ class Articulo(Base):
         id (int): Identificador único del artículo.
         nombre (str): Nombre del artículo.
         descripcion (str): Descripción detallada del artículo.
-        sku (str): Código único del artículo.
+        codigo (str): Código único del artículo.
         activo (bool): Indica si el artículo está activo.
         id_familia (int): Identificador de la familia a la que pertenece el artículo
         id_precio_venta (int): Identificador del precio de venta asociado al artículo.
@@ -25,7 +25,7 @@ class Articulo(Base):
     id = Column(Integer, primary_key=True, index=True)
     nombre = Column(String(200), nullable=False)
     descripcion = Column(Text)
-    sku = Column(String(50), unique=True)
+    codigo = Column(String(50), unique=True)
     activo = Column(Boolean, default=True)
     
     # Foreign Keys

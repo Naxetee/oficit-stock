@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 🎯 Ejecutor de Ejemplos del Sistema de Inventario
 
@@ -10,17 +11,31 @@ import os
 from pathlib import Path
 
 # Agregar el directorio raíz del proyecto al path
-project_root = Path(__file__).parent
+project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 from sqlalchemy.orm import Session
-from sqlalchemy import text
+from sqlalchemy import text, create_engine
+from sqlalchemy.orm import sessionmaker
+import os
+from dotenv import load_dotenv
 from app.db import SessionLocal
-from app.testing.ejemplos import (
+from app.services.ejemplos import (
     ejemplo_uso_servicios_individuales,
     ejemplo_uso_servicio_coordinador,
     ejemplo_operaciones_avanzadas
 )
+
+# Cargar variables de entorno
+load_dotenv()
+
+# Crear engine silencioso para los ejemplos (sin logs SQL)
+DATABASE_URL = (
+    f"postgresql+psycopg2://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}"
+    f"@{os.getenv('POSTGRES_HOST')}:{os.getenv('POSTGRES_PORT')}/{os.getenv('POSTGRES_DB')}"
+)
+silent_engine = create_engine(DATABASE_URL, echo=False)
+SilentSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=silent_engine)
 
 def verificar_tablas():
     """
@@ -98,6 +113,10 @@ def ejecutar_ejemplo(opcion: str, session: Session):
     """
     Ejecutar el ejemplo seleccionado
     """
+    # Temporalmente suprimir logs de SQLAlchemy para una salida más limpia
+    import logging
+    logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
+    
     try:
         if opcion == "1":
             print("\n🔧 Ejecutando: Servicios Individuales")
@@ -129,10 +148,18 @@ def ejecutar_ejemplo(opcion: str, session: Session):
         print(f"\n❌ Error ejecutando ejemplo: {e}")
         import traceback
         traceback.print_exc()
+    
+    finally:
+        # Restaurar nivel de logging
+        logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
 def main():
     """
     Función principal del ejecutor
+    
+    Nota: Usa dos tipos de sesiones diferentes:
+    - SessionLocal: Para verificaciones (mantiene logs para debugging)
+    - SilentSessionLocal: Para ejemplos (sin logs SQL para salida limpia)
     """
     print("🎯 Sistema de Inventario - Ejecutor de Ejemplos")
     print("=" * 60)
@@ -159,8 +186,8 @@ def main():
                 print("\n❌ Opción inválida. Por favor selecciona 0-4.")
                 continue
             
-            # Ejecutar ejemplo con sesión de BD
-            with SessionLocal() as session:
+            # Ejecutar ejemplo con sesión de BD silenciosa (sin logs SQL)
+            with SilentSessionLocal() as session:
                 ejecutar_ejemplo(opcion, session)
                 
             # Preguntar si quiere continuar
