@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 🎯 Ejecutor de Ejemplos del Sistema de Inventario
 
@@ -16,31 +15,39 @@ sys.path.insert(0, str(project_root))
 
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-from app.db import SessionLocal, engine, Base
-from app.services.ejemplos import (
+from app.db import SessionLocal
+from app.testing.ejemplos import (
     ejemplo_uso_servicios_individuales,
     ejemplo_uso_servicio_coordinador,
     ejemplo_operaciones_avanzadas
 )
 
-def crear_tablas():
+def verificar_tablas():
     """
-    Crear todas las tablas en la base de datos
+    Verificar que las tablas existen en la base de datos (creadas por Alembic)
     """
-    print("🔧 Creando tablas en la base de datos...")
+    print("🔍 Verificando que las tablas existen...")
     try:
-        # Importar todos los modelos para que se registren
-        from app.models import (
-            familia, color, proveedor, precio_venta, precio_compra,
-            articulo, producto, producto_simple, producto_compuesto,
-            componente, componente_producto, pack, pack_producto, stock
-        )
-        
-        Base.metadata.create_all(bind=engine)
-        print("✅ Tablas creadas exitosamente")
-        return True
+        with SessionLocal() as session:
+            # Verificar algunas tablas clave
+            result = session.execute(text("SELECT tablename FROM pg_tables WHERE schemaname = 'public'"))
+            tablas = [row[0] for row in result.fetchall()]
+            
+            tablas_requeridas = ['familia', 'color', 'proveedor', 'articulo', 'producto', 'stock']
+            tablas_faltantes = [tabla for tabla in tablas_requeridas if tabla not in tablas]
+            
+            if tablas_faltantes:
+                print(f"❌ Faltan tablas: {', '.join(tablas_faltantes)}")
+                print("💡 Ejecuta: alembic upgrade head")
+                return False
+            
+            print(f"✅ Todas las tablas necesarias existen ({len(tablas)} tablas encontradas)")
+            return True
     except Exception as e:
-        print(f"❌ Error creando tablas: {e}")
+        print(f"❌ Error verificando tablas: {e}")
+        print("💡 Asegúrate de que:")
+        print("   - PostgreSQL esté corriendo")
+        print("   - Las migraciones estén aplicadas: alembic upgrade head")
         return False
 
 def verificar_conexion():
@@ -134,8 +141,8 @@ def main():
     if not verificar_conexion():
         return
     
-    # 2. Crear tablas si no existen
-    if not crear_tablas():
+    # 2. Verificar que las tablas existen (creadas por Alembic)
+    if not verificar_tablas():
         return
     
     # 3. Menú interactivo
