@@ -38,7 +38,7 @@ Este proyecto es el primer microservicio del sistema de digitalización interna 
 
 ## 📚 Documentación
 
-- [Modelo de datos y diagrama ER](docs/diagram/README-diagrama.md)
+- [Modelo de datos y diagrama ER](docs/diagram/README-diagram.md)
 - [Guía de instalación y uso](docs/INSTALL.md)
 
 ## 🔒 Licencia y uso
