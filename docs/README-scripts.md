@@ -34,24 +34,6 @@ Esta carpeta contiene varios scripts de PowerShell para gestionar fácilmente el
 .\setup-inventario.ps1 -Help
 ```
 
-### 2. `iniciar.ps1` - Script Rápido de Inicio
-
-**Para uso diario rápido:**
-
-```powershell
-# Inicia Docker y muestra información de conexión
-.\iniciar.ps1
-```
-
-### 3. `detener.ps1` - Script Rápido de Parada
-
-**Para detener servicios:**
-
-```powershell
-# Detiene todos los servicios Docker
-.\detener.ps1
-```
-
 ## 🎯 Uso Recomendado
 
 ### Primera Vez (Configuración Inicial):
@@ -65,19 +47,6 @@ Esta carpeta contiene varios scripts de PowerShell para gestionar fácilmente el
 
 # 3. Probar conexión
 .\setup-inventario.ps1 -Connect
-```
-
-### Uso Diario:
-
-```powershell
-# Iniciar por la mañana
-.\iniciar.ps1
-
-# Trabajar con el sistema...
-python ejecutar_ejemplos.py
-
-# Detener al final del día
-.\detener.ps1
 ```
 
 ### Solución de Problemas:
@@ -110,7 +79,7 @@ Los scripts se conectan a PostgreSQL con esta configuración:
 - **Puerto:** 5432
 - **Base de datos:** oficit_stock
 - **Usuario:** oficit
-- **Contraseña:** root
+- **Contraseña:** \*\*\*\* (se oculta por seguridad)
 
 ## 🎨 Características de los Scripts
 
@@ -122,7 +91,6 @@ Los scripts se conectan a PostgreSQL con esta configuración:
 - 🔗 **Información de conexión** completa
 - 🧹 **Limpieza segura** con confirmación
 - 🎨 **Salida coloreada** para mejor UX
-- ⚡ **Opciones rápidas** y completas
 
 ### 🛡️ Seguridad:
 
