@@ -40,17 +40,18 @@ class ArticuloService(BaseService):
         """
         super().__init__(db_session, Articulo)
         
-    def crear_articulo(self, nombre: str, descripcion: str = None, 
-                      codigo: str = None, id_familia: int = None,
-                      id_precio_venta: int = None) -> Articulo:
+    def crear_articulo( self, nombre: str, id_familia: int, 
+                        descripcion: str, codigo: str = None, 
+                        activo: bool = False, id_precio_venta: int = None) -> Articulo:
         """
         Crear un nuevo artículo con validaciones
         
         Args:
             nombre (str): Nombre del artículo (requerido)
-            descripcion (str, optional): Descripción del artículo
+            id_familia (int): ID de la familia asociada
+            descripcion (str): Descripción del artículo
             codigo (str, optional): Código único del artículo
-            id_familia (int, optional): ID de la familia asociada
+            activo (bool, optional): Indica si el artículo está activo
             id_precio_venta (int, optional): ID del precio de venta
             
         Returns:
@@ -61,11 +62,10 @@ class ArticuloService(BaseService):
             SQLAlchemyError: Error en la operación de base de datos
         """
         try:
-            # Validar que la familia existe si se proporciona
-            if id_familia:
-                familia = self.db.query(Familia).filter(Familia.id == id_familia).first()
-                if not familia:
-                    raise ValueError(f"La familia con ID {id_familia} no existe")
+            # Validar que la familia existe
+            familia = self.db.query(Familia).filter(Familia.id == id_familia).first()
+            if not familia:
+                raise ValueError(f"La familia con ID {id_familia} no existe")
                     
             # Validar que el precio de venta existe si se proporciona
             if id_precio_venta:
@@ -83,6 +83,7 @@ class ArticuloService(BaseService):
                 nombre=nombre,
                 descripcion=descripcion,
                 codigo=codigo,
+                activo=activo,
                 id_familia=id_familia,
                 id_precio_venta=id_precio_venta
             )
@@ -242,7 +243,8 @@ class ArticuloService(BaseService):
                     'id': articulo.id,
                     'nombre': articulo.nombre,
                     'descripcion': articulo.descripcion,
-                    'codigo': articulo.codigo
+                    'codigo': articulo.codigo,
+                    'activo': articulo.activo,
                 },
                 'tipo': self.obtener_tipo_articulo(articulo_id),
                 'fecha_creacion': articulo.created_at,
@@ -368,6 +370,9 @@ class ArticuloService(BaseService):
                 articulo_existente = self.obtener_por_codigo(kwargs['codigo'])
                 if articulo_existente and articulo_existente.id != articulo_id:
                     raise ValueError(f"Ya existe otro artículo con el código '{kwargs['codigo']}'")
+                
+            if 'activo' in kwargs and  isinstance(kwargs['activo'], bool):
+                raise ValueError("El campo 'activo' debe ser un booleano")
                     
             return self.actualizar(articulo_id, **kwargs)
             
