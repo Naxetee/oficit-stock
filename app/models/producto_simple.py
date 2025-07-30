@@ -17,6 +17,7 @@ class ProductoSimple(Base):
         id_proveedor (int): Referencia al proveedor que lo suministra
         id_precio_compra (int): Referencia al precio de compra actual
         id_color (int): Referencia al color del producto (opcional)
+        id_familia (int, opcional): Referencia a la familia del producto
         created_at (datetime): Fecha y hora de creación
         updated_at (datetime): Fecha y hora de última actualización
         
@@ -37,6 +38,7 @@ class ProductoSimple(Base):
     id_proveedor = Column(Integer, ForeignKey("proveedor.id"))
     id_precio_compra = Column(Integer, ForeignKey("precio_compra.id"))
     id_color = Column(Integer, ForeignKey("color.id"))
+    id_familia = Column(Integer, ForeignKey("familia.id"))
     
     # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now())

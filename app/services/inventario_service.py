@@ -7,17 +7,6 @@ para realizar operaciones complejas que involucran múltiples entidades.
 
 from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
-from sqlalchemy.exc import SQLAlchemyError
-
-from .familia_service import FamiliaService
-from .color_service import ColorService
-from .proveedor_service import ProveedorService
-from .precio_service import PrecioService
-from .articulo_service import ArticuloService
-from .producto_service import ProductoService
-from .componente_service import ComponenteService
-from .pack_service import PackService
-from .stock_service import StockService
 
 import logging
 
@@ -41,16 +30,88 @@ class InventarioService:
         """
         self.db = db_session
         
-        # Inicializar todos los servicios especializados
-        self.familia_service = FamiliaService(db_session)
-        self.color_service = ColorService(db_session)
-        self.proveedor_service = ProveedorService(db_session)
-        self.precio_service = PrecioService(db_session)
-        self.articulo_service = ArticuloService(db_session)
-        self.producto_service = ProductoService(db_session)
-        self.componente_service = ComponenteService(db_session)
-        self.pack_service = PackService(db_session)
-        self.stock_service = StockService(db_session)
+        # No inicializar servicios aquí para evitar circular imports
+        self._familia_service = None
+        self._color_service = None
+        self._proveedor_service = None
+        self._precio_service = None
+        self._articulo_service = None
+        self._producto_service = None
+        self._componente_service = None
+        self._pack_service = None
+        self._stock_service = None
+        
+    @property
+    def familia_service(self):
+        """Lazy loading del FamiliaService"""
+        if self._familia_service is None:
+            from .familia_service import FamiliaService
+            self._familia_service = FamiliaService(self.db)
+        return self._familia_service
+        
+    @property
+    def color_service(self):
+        """Lazy loading del ColorService"""
+        if self._color_service is None:
+            from .color_service import ColorService
+            self._color_service = ColorService(self.db)
+        return self._color_service
+        
+    @property
+    def proveedor_service(self):
+        """Lazy loading del ProveedorService"""
+        if self._proveedor_service is None:
+            from .proveedor_service import ProveedorService
+            self._proveedor_service = ProveedorService(self.db)
+        return self._proveedor_service
+        
+    @property
+    def precio_service(self):
+        """Lazy loading del PrecioService"""
+        if self._precio_service is None:
+            from .precio_service import PrecioService
+            self._precio_service = PrecioService(self.db)
+        return self._precio_service
+        
+    @property
+    def articulo_service(self):
+        """Lazy loading del ArticuloService"""
+        if self._articulo_service is None:
+            from .articulo_service import ArticuloService
+            self._articulo_service = ArticuloService(self.db)
+        return self._articulo_service
+        
+    @property
+    def producto_service(self):
+        """Lazy loading del ProductoService"""
+        if self._producto_service is None:
+            from .producto_service import ProductoService
+            self._producto_service = ProductoService(self.db)
+        return self._producto_service
+        
+    @property
+    def componente_service(self):
+        """Lazy loading del ComponenteService"""
+        if self._componente_service is None:
+            from .componente_service import ComponenteService
+            self._componente_service = ComponenteService(self.db)
+        return self._componente_service
+        
+    @property
+    def pack_service(self):
+        """Lazy loading del PackService"""
+        if self._pack_service is None:
+            from .pack_service import PackService
+            self._pack_service = PackService(self.db)
+        return self._pack_service
+        
+    @property
+    def stock_service(self):
+        """Lazy loading del StockService"""
+        if self._stock_service is None:
+            from .stock_service import StockService
+            self._stock_service = StockService(self.db)
+        return self._stock_service
         
     def crear_producto_simple_completo(self, nombre_articulo: str, descripcion_articulo: str = None,
                                      codigo_articulo: str = None, familia_id: int = None,

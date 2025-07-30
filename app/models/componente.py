@@ -19,7 +19,8 @@ class Componente(Base):
         unidad_medida (str): Unidad de medida (unidad, metro, kg, etc.)
         id_proveedor (int): Referencia al proveedor que lo suministra
         id_precio_compra (int): Referencia al precio de compra actual
-        id_color (int): Referencia al color del componente (opcional)
+        id_color (int, opcional): Referencia al color del componente
+        id_familia (int, opcional): Referencia a la familia del componente
         created_at (datetime): Fecha y hora de creación
         updated_at (datetime): Fecha y hora de última actualización
         

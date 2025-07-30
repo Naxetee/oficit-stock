@@ -5,6 +5,8 @@ Aplicación principal que coordina todos los endpoints del sistema de inventario
 Organizada por modelos con rutas específicas para cada entidad.
 """
 
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 import uvicorn
 import sys
 sys.path.insert(0, "./app/..")
@@ -13,6 +15,7 @@ from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from app.db import SessionLocal
+from fastapi.openapi.utils import get_openapi
 
 # Importar todos los routers de rutas
 from app.routes import (
@@ -35,14 +38,14 @@ app = FastAPI(
     ## Sistema de Inventario Completo
 
     API RESTful para gestión integral de inventario con:
-    - 👥 **Familias y Colores**: Organización por categorías
-    - 🏢 **Proveedores**: Gestión de proveedores y contactos  
-    - 💰 **Precios**: Control de precios de compra y venta
-    - 📦 **Artículos**: Catálogo base de productos
-    - 🔧 **Componentes**: Elementos para productos compuestos
-    - 🏷️ **Productos**: Simples y compuestos
-    - 📊 **Stock**: Control de inventario y movimientos
-    - 🎯 **Coordinador**: Operaciones complejas del inventario
+    - 👥 Familias y Colores: Organización por categorías
+    - 🏢 Proveedores: Gestión de proveedores y contactos  
+    - 💰 Precios: Control de precios de compra y venta
+    - 📦 Artículos: Catálogo base de productos
+    - 🔧 Componentes: Elementos para productos compuestos
+    - 🏷️ Productos: Simples y compuestos
+    - 📊 Stock: Control de inventario y movimientos
+    - 🎯 Coordinador: Operaciones complejas del inventario
 
     ### Características:
     - ✅ CRUD completo para todas las entidades
@@ -54,13 +57,47 @@ app = FastAPI(
     ---
     ## 🔒 Licencia y uso
 
-    > ⚠️ **Este software es propiedad de Tienda Oficit SL. Queda prohibida su copia, distribución o uso fuera de la empresa sin autorización expresa.**
+    > ⚠️ Este software es propiedad de Tienda Oficit SL. Queda prohibida su copia, distribución o uso fuera de la empresa sin autorización expresa.
     """,
     version="1.0.0",
     contact={
         "name": "Tienda Oficit SLU",
-    }
+    },
+    # Ocultar 422 globalmente
+    openapi_url="/openapi.json",
+    docs_url="/docs",
+    redoc_url="/redoc"
 )
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc):
+    return JSONResponse(
+        status_code=400,
+        content={"detail": "Datos inválidos en la petición"}
+    )
+
+# Personalizar la generación de OpenAPI para ocultar 422
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    
+    openapi_schema = get_openapi(
+        title=app.title,
+        version=app.version,
+        description=app.description,
+        routes=app.routes,
+    )
+    
+    # Remover 422 de todas las rutas
+    for path_data in openapi_schema["paths"].values():
+        for operation in path_data.values():
+            if "responses" in operation and "422" in operation["responses"]:
+                del operation["responses"]["422"]
+    
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+app.openapi = custom_openapi
 
 def get_db():
     """

@@ -19,9 +19,6 @@ from .stock import Stock
 from .componente_producto import ComponenteProducto
 from .pack_producto import PackProducto
 
-# Servicios
-from .inventario_service import InventarioService
-
 # Exportar todos los modelos
 __all__ = [
     "Familia",

@@ -117,12 +117,15 @@ class BaseService:
             for campo, valor in kwargs.items():
                 if hasattr(instancia, campo):
                     setattr(instancia, campo, valor)
-                    
+            self.db.add(instancia)  # Marca la instancia como modificada
+            
             self.db.commit()
             self.db.refresh(instancia)
             
             logger.info(f"✅ Actualizado {self.model_class.__name__} con ID: {id}")
-            return instancia
+            
+            instancia_actualizada = self.obtener_por_id(id)
+            return instancia_actualizada
             
         except SQLAlchemyError as e:
             self.db.rollback()

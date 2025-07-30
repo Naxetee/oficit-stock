@@ -13,6 +13,7 @@ class ProductoCompuesto(Base):
     Attributes:
         id (int): Identificador único del producto compuesto
         id_producto (int): Referencia al producto base (única)
+        id_familia (int, opcional): Referencia a la familia del producto
         instrucciones_ensamblaje (str): Instrucciones para fabricar el producto
         tiempo_fabricacion (int): Tiempo estimado en minutos
         created_at (datetime): Fecha y hora de creación
@@ -31,6 +32,7 @@ class ProductoCompuesto(Base):
     
     # Foreign Keys
     id_producto = Column(Integer, ForeignKey("producto.id"), nullable=False, unique=True)
+    id_familia = Column(Integer, ForeignKey("familia.id"))
     
     # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now())

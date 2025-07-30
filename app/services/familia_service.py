@@ -6,12 +6,16 @@ de productos, incluyendo operaciones CRUD y consultas específicas.
 """
 
 from typing import List, Optional
+from pydantic_core import ValidationError
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.models.familia import Familia
 from app.models.articulo import Articulo
 from app.models.color import Color
+from app.schemas.articuloDTO import ArticuloInDB
+from app.schemas.familiaDTO import FamiliaCreate, FamiliaInDB, FamiliaUpdate
+from app.schemas.colorDTO import ColorInDB
 from .base_service import BaseService
 import logging
 
@@ -38,13 +42,12 @@ class FamiliaService(BaseService):
         """
         super().__init__(db_session, Familia)
         
-    def crear_familia(self, nombre: str, descripcion: str = None) -> Familia:
+    def crear_familia(self, nueva_familia : FamiliaCreate) -> FamiliaInDB:
         """
         Crear una nueva familia de productos
         
         Args:
-            nombre (str): Nombre de la familia (requerido)
-            descripcion (str, optional): Descripción de la familia
+            nueva_familia (FamiliaCreate): Datos de la nueva familia
             
         Returns:
             Familia: Nueva familia creada
@@ -54,20 +57,26 @@ class FamiliaService(BaseService):
             SQLAlchemyError: Error en la operación de base de datos
         """
         try:
+            nombre = nueva_familia.nombre
             # Verificar que no exista una familia con el mismo nombre
             familia_existente = self.obtener_por_nombre(nombre)
             if familia_existente:
                 raise ValueError(f"Ya existe una familia con el nombre '{nombre}'")
                 
-            familia = self.crear(nombre=nombre, descripcion=descripcion)
-            logger.info(f"✅ Familia '{nombre}' creada exitosamente")
-            return familia
-            
+            familia = self.crear(**nueva_familia.model_dump())
         except SQLAlchemyError as e:
             logger.error(f"❌ Error creando familia '{nombre}': {e}")
             raise
+
+        try:
+            # Convertir a FamiliaInDB antes de retornar
+            logger.info(f"✅ Familia '{nombre}' creada exitosamente")
+            return FamiliaInDB.model_validate(familia)
+        except ValidationError as e:
+            logger.error(f"❌ Error validando familia creada: {e}")
+            raise
             
-    def obtener_por_nombre(self, nombre: str) -> Optional[Familia]:
+    def obtener_por_nombre(self, nombre: str) -> Optional[FamiliaInDB]:
         """
         Obtener una familia por su nombre
         
@@ -75,15 +84,24 @@ class FamiliaService(BaseService):
             nombre (str): Nombre de la familia a buscar
             
         Returns:
-            Optional[Familia]: Familia encontrada o None
+            Optional[FamiliaInDB]: Familia encontrada o None
         """
         try:
-            return self.db.query(Familia).filter(Familia.nombre == nombre).first()
+            familia = self.db.query(Familia).filter(Familia.nombre.ilike(nombre)).first()
         except SQLAlchemyError as e:
             logger.error(f"❌ Error buscando familia por nombre '{nombre}': {e}")
             raise
+
+        if familia:
+            try:
+                return FamiliaInDB.model_validate(familia)
+            except ValidationError as e:
+                logger.error(f"❌ Error validando familia '{nombre}': {e}")
+                raise
+        else:
+            return None
             
-    def obtener_articulos_por_familia(self, familia_id: int) -> List[Articulo]:
+    def obtener_articulos_por_familia(self, familia_id: int) -> List[ArticuloInDB]:
         """
         Obtener todos los artículos de una familia específica
         
@@ -91,15 +109,24 @@ class FamiliaService(BaseService):
             familia_id (int): ID de la familia
             
         Returns:
-            List[Articulo]: Lista de artículos de la familia
+            List[ArticuloInDB]: Lista de artículos de la familia
         """
         try:
-            return self.db.query(Articulo).filter(Articulo.id_familia == familia_id).all()
+            articulos = self.db.query(Articulo).filter(Articulo.id_familia == familia_id).all()
         except SQLAlchemyError as e:
             logger.error(f"❌ Error obteniendo artículos de familia {familia_id}: {e}")
             raise
+
+        if not articulos:
+            return []
+        else:
+            try:
+                return [ArticuloInDB.model_validate(articulo) for articulo in articulos]
+            except ValidationError as e:
+                logger.error(f"❌ Error validando artículos de familia {familia_id}: {e}")
+                raise
             
-    def obtener_colores_por_familia(self, familia_id: int) -> List[Color]:
+    def obtener_colores_por_familia(self, familia_id: int) -> List[ColorInDB]:
         """
         Obtener todos los colores asociados a una familia
         
@@ -107,15 +134,23 @@ class FamiliaService(BaseService):
             familia_id (int): ID de la familia
             
         Returns:
-            List[Color]: Lista de colores de la familia
+            List[ColorInDB]: Lista de colores de la familia
         """
         try:
-            return self.db.query(Color).filter(Color.id_familia == familia_id).all()
+            colores = self.db.query(Color).filter(Color.id_familia == familia_id).all()
         except SQLAlchemyError as e:
             logger.error(f"❌ Error obteniendo colores de familia {familia_id}: {e}")
             raise
+        if not colores:
+            return []
+        else:
+            try:
+                return [ColorInDB.model_validate(color) for color in colores]
+            except ValidationError as e:
+                logger.error(f"❌ Error validando colores de familia {familia_id}: {e}")
+                raise
             
-    def obtener_estadisticas_familia(self, familia_id: int) -> dict:
+    def obtener_estadisticas_familia(self, familia_id: int) -> Optional[dict]:
         """
         Obtener estadísticas de una familia específica
         
@@ -131,7 +166,7 @@ class FamiliaService(BaseService):
         try:
             familia = self.obtener_por_id(familia_id)
             if not familia:
-                return {'error': 'Familia no encontrada'}
+                return None
                 
             total_articulos = len(self.obtener_articulos_por_familia(familia_id))
             total_colores = len(self.obtener_colores_por_familia(familia_id))
@@ -152,7 +187,7 @@ class FamiliaService(BaseService):
             logger.error(f"❌ Error obteniendo estadísticas de familia {familia_id}: {e}")
             raise
             
-    def buscar_familias_por_texto(self, texto: str) -> List[Familia]:
+    def buscar_familias_por_texto(self, texto: str) -> List[FamiliaInDB]:
         """
         Buscar familias por texto en nombre o descripción
         
@@ -160,16 +195,24 @@ class FamiliaService(BaseService):
             texto (str): Texto a buscar
             
         Returns:
-            List[Familia]: Lista de familias que coinciden con la búsqueda
+            List[FamiliaInDB]: Lista de familias que coinciden con la búsqueda
         """
         try:
-            return self.db.query(Familia).filter(
+            familias = self.db.query(Familia).filter(
                 (Familia.nombre.ilike(f'%{texto}%')) |
                 (Familia.descripcion.ilike(f'%{texto}%'))
             ).all()
         except SQLAlchemyError as e:
             logger.error(f"❌ Error buscando familias por texto '{texto}': {e}")
             raise
+        if not familias:
+            return []
+        else:
+            try:
+                return [FamiliaInDB.model_validate(familia) for familia in familias]
+            except ValidationError as e:
+                logger.error(f"❌ Error validando familias por texto '{texto}': {e}")
+                raise
             
     def validar_eliminacion(self, familia_id: int) -> dict:
         """
@@ -205,4 +248,55 @@ class FamiliaService(BaseService):
             
         except SQLAlchemyError as e:
             logger.error(f"❌ Error validando eliminación de familia {familia_id}: {e}")
+            raise
+    
+    def actualizar_familia(self, familia_id: int, datos_actualizacion: FamiliaUpdate) -> FamiliaInDB:
+        """
+        Actualizar una familia específica con validación
+        
+        Args:
+            familia_id (int): ID de la familia a actualizar
+            datos_actualizacion (FamiliaUpdate): Datos a actualizar
+            
+        Returns:
+            FamiliaInDB: Familia actualizada
+            
+        Raises:
+            ValueError: Si la familia no existe
+            SQLAlchemyError: Error en la operación de base de datos
+        """
+        try:
+            # Verificar que la familia existe
+            familia_existente = self.db.query(Familia).filter(Familia.id == familia_id).first()
+            if not familia_existente:
+                raise ValueError(f"No se encontró familia con ID {familia_id}")
+            
+            # Actualizar solo los campos que no son None
+            datos_dict = datos_actualizacion.model_dump(exclude_unset=True)
+            
+            # Si se está actualizando el nombre, verificar que no existe otra familia con ese nombre
+            if 'nombre' in datos_dict and datos_dict['nombre']:
+                familia_con_mismo_nombre = self.db.query(Familia).filter(
+                    Familia.nombre == datos_dict['nombre'],
+                    Familia.id != familia_id
+                ).first()
+                if familia_con_mismo_nombre:
+                    raise ValueError(f"Ya existe una familia con el nombre '{datos_dict['nombre']}'")
+            
+            # Actualizar los campos
+            for campo, valor in datos_dict.items():
+                setattr(familia_existente, campo, valor)
+            
+            # Guardar cambios
+            self.db.commit()
+            self.db.refresh(familia_existente)
+            
+            logger.info(f"✅ Familia ID {familia_id} actualizada exitosamente")
+            return FamiliaInDB.model_validate(familia_existente)
+            
+        except ValueError:
+            raise
+        except SQLAlchemyError as e:
+            self.db.rollback()
+            logger.error(f"❌ Error actualizando familia {familia_id}: {e}")
             raise
