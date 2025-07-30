@@ -1,4 +1,3 @@
-import os
 from time import sleep
 from fastapi.testclient import TestClient
 from app.db import SessionLocal
@@ -7,21 +6,9 @@ from app.schemas.familiaDTO import FamiliaCreate
 from app.services.familia_service import FamiliaService
 from sqlalchemy import text
 
-client = TestClient(app)
+from app.tests import reset_db
 
-def reset_db(db):
-    """
-    Limpia todas las tablas de la base de datos.
-    """
-    try:
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        file_path = os.path.join(base_dir, '..', '..', 'scripts', 'clean_all_tables.sql')
-        with open(file_path, "r", encoding="utf-8") as f:
-            sql_script = f.read()
-        db.execute(text(sql_script))
-        db.commit()
-    finally:
-        db.close()
+client = TestClient(app)
 
 class TestEmptyFamiliaDB:
     @classmethod
@@ -31,9 +18,14 @@ class TestEmptyFamiliaDB:
         Se ejecuta una vez antes de todos los tests de la clase.
         Limpia la tabla de familias en la base de datos.
         """
+        cls.db = SessionLocal()
+        try:
+            reset_db(cls.db)
+            sleep(1)  # Esperar un segundo para asegurar que la base de datos esté limpia
+        finally:
+            cls.db.close()
         pass
         
-
     def setup_method(self, method):
         """
         Configuración antes de cada método de prueba.
@@ -52,11 +44,9 @@ class TestEmptyFamiliaDB:
         Se ejecuta una vez después de todos los tests de la clase.
         """
         cls.db = SessionLocal()
-        try:
-            cls.db.execute(text("DELETE FROM familia"))
-            cls.db.commit()
-        finally:
-            cls.db.close()
+        reset_db(cls.db)
+        cls.db.close()
+
     
     def test_listar_familias_vacías(self):
         """
@@ -199,7 +189,7 @@ class TestEmptyFamiliaDB:
         assert response.status_code == 404
         assert response.json() == {"detail": "Familia no encontrada"}
 
-class TestFamiliaDBConDatos:
+class TestFamiliaDBWithData:
     @classmethod
     def setup_class(cls):
         """
@@ -240,6 +230,7 @@ class TestFamiliaDBConDatos:
         """
         cls.db = SessionLocal()
         reset_db(cls.db)
+        cls.db.close()
 
     def test_listar_familias_con_datos(self):
         """

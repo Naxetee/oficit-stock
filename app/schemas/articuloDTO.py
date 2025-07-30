@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator, validator
 from typing import Optional
 from decimal import Decimal
 from datetime import datetime
@@ -15,7 +15,7 @@ class ArticuloBase(BaseModel):
     familia_id: Optional[int] = Field(None, description="ID de la familia")
     activo: bool = Field(True, description="Estado del artículo")
 
-    @validator('precio_compra', 'precio_venta')
+    @field_validator('precio_compra', 'precio_venta')
     def validate_precios(cls, v):
         if v <= 0:
             raise ValueError('El precio debe ser mayor a 0')

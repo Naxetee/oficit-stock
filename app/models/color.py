@@ -13,10 +13,11 @@ class Color(Base):
     Attributes:
         id (int): Identificador único del color
         nombre (str): Nombre del color (único en el sistema)
-        codigo_hex (str): Código hexadecimal del color (opcional)
+        codigo_hex (str, opcional): Código hexadecimal del color 
         url_imagen (str): URL de imagen representativa del color
         activo (bool): Indica si el color está disponible
-        id_familia (int): Referencia a familia de colores (opcional)
+        descripcion (str, opcional): Descripción del color 
+        id_familia (int, opcional): Referencia a familia de colores 
         created_at (datetime): Fecha y hora de creación
         updated_at (datetime): Fecha y hora de última actualización
         
@@ -32,6 +33,7 @@ class Color(Base):
     url_imagen = Column(String(2000))  # URL de la imagen del color
     activo = Column(Boolean, default=True)
     id_familia = Column(Integer, ForeignKey("familia.id"))  # Relación con familia de colores
+    descripcion = Column(Text, nullable=True)  # Descripción del color
     
     # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now())

@@ -14,7 +14,7 @@ from app.models.familia import Familia
 from app.models.articulo import Articulo
 from app.models.color import Color
 from app.schemas.articuloDTO import ArticuloInDB
-from app.schemas.familiaDTO import FamiliaCreate, FamiliaInDB, FamiliaUpdate
+from app.schemas.familiaDTO import FamiliaCreate, FamiliaResponse, FamiliaUpdate
 from app.schemas.colorDTO import ColorInDB
 from .base_service import BaseService
 import logging
@@ -42,7 +42,7 @@ class FamiliaService(BaseService):
         """
         super().__init__(db_session, Familia)
         
-    def crear_familia(self, nueva_familia : FamiliaCreate) -> FamiliaInDB:
+    def crear_familia(self, nueva_familia : FamiliaCreate) -> FamiliaResponse:
         """
         Crear una nueva familia de productos
         
@@ -69,14 +69,14 @@ class FamiliaService(BaseService):
             raise
 
         try:
-            # Convertir a FamiliaInDB antes de retornar
+            # Convertir a FamiliaResponse antes de retornar
             logger.info(f"✅ Familia '{nombre}' creada exitosamente")
-            return FamiliaInDB.model_validate(familia)
+            return FamiliaResponse.model_validate(familia)
         except ValidationError as e:
             logger.error(f"❌ Error validando familia creada: {e}")
             raise
             
-    def obtener_por_nombre(self, nombre: str) -> Optional[FamiliaInDB]:
+    def obtener_por_nombre(self, nombre: str) -> Optional[FamiliaResponse]:
         """
         Obtener una familia por su nombre
         
@@ -84,7 +84,7 @@ class FamiliaService(BaseService):
             nombre (str): Nombre de la familia a buscar
             
         Returns:
-            Optional[FamiliaInDB]: Familia encontrada o None
+            Optional[FamiliaResponse]: Familia encontrada o None
         """
         try:
             familia = self.db.query(Familia).filter(Familia.nombre.ilike(nombre)).first()
@@ -94,7 +94,7 @@ class FamiliaService(BaseService):
 
         if familia:
             try:
-                return FamiliaInDB.model_validate(familia)
+                return FamiliaResponse.model_validate(familia)
             except ValidationError as e:
                 logger.error(f"❌ Error validando familia '{nombre}': {e}")
                 raise
@@ -187,7 +187,7 @@ class FamiliaService(BaseService):
             logger.error(f"❌ Error obteniendo estadísticas de familia {familia_id}: {e}")
             raise
             
-    def buscar_familias_por_texto(self, texto: str) -> List[FamiliaInDB]:
+    def buscar_familias_por_texto(self, texto: str) -> List[FamiliaResponse]:
         """
         Buscar familias por texto en nombre o descripción
         
@@ -195,7 +195,7 @@ class FamiliaService(BaseService):
             texto (str): Texto a buscar
             
         Returns:
-            List[FamiliaInDB]: Lista de familias que coinciden con la búsqueda
+            List[FamiliaResponse]: Lista de familias que coinciden con la búsqueda
         """
         try:
             familias = self.db.query(Familia).filter(
@@ -209,7 +209,7 @@ class FamiliaService(BaseService):
             return []
         else:
             try:
-                return [FamiliaInDB.model_validate(familia) for familia in familias]
+                return [FamiliaResponse.model_validate(familia) for familia in familias]
             except ValidationError as e:
                 logger.error(f"❌ Error validando familias por texto '{texto}': {e}")
                 raise
@@ -250,7 +250,7 @@ class FamiliaService(BaseService):
             logger.error(f"❌ Error validando eliminación de familia {familia_id}: {e}")
             raise
     
-    def actualizar_familia(self, familia_id: int, datos_actualizacion: FamiliaUpdate) -> FamiliaInDB:
+    def actualizar_familia(self, familia_id: int, datos_actualizacion: FamiliaUpdate) -> FamiliaResponse:
         """
         Actualizar una familia específica con validación
         
@@ -259,7 +259,7 @@ class FamiliaService(BaseService):
             datos_actualizacion (FamiliaUpdate): Datos a actualizar
             
         Returns:
-            FamiliaInDB: Familia actualizada
+            FamiliaResponse: Familia actualizada
             
         Raises:
             ValueError: Si la familia no existe
@@ -270,18 +270,16 @@ class FamiliaService(BaseService):
             familia_existente = self.db.query(Familia).filter(Familia.id == familia_id).first()
             if not familia_existente:
                 raise ValueError(f"No se encontró familia con ID {familia_id}")
-            
-            # Actualizar solo los campos que no son None
-            datos_dict = datos_actualizacion.model_dump(exclude_unset=True)
-            
+
+            datos_dict = datos_actualizacion.model_dump()
+                        
             # Si se está actualizando el nombre, verificar que no existe otra familia con ese nombre
-            if 'nombre' in datos_dict and datos_dict['nombre']:
-                familia_con_mismo_nombre = self.db.query(Familia).filter(
-                    Familia.nombre == datos_dict['nombre'],
-                    Familia.id != familia_id
-                ).first()
-                if familia_con_mismo_nombre:
-                    raise ValueError(f"Ya existe una familia con el nombre '{datos_dict['nombre']}'")
+            familia_con_mismo_nombre = self.db.query(Familia).filter(
+                Familia.nombre == datos_dict['nombre'],
+                Familia.id != familia_id
+            ).first()
+            if familia_con_mismo_nombre:
+                raise ValueError(f"Ya existe una familia con el nombre '{datos_dict['nombre']}'")
             
             # Actualizar los campos
             for campo, valor in datos_dict.items():
@@ -292,7 +290,7 @@ class FamiliaService(BaseService):
             self.db.refresh(familia_existente)
             
             logger.info(f"✅ Familia ID {familia_id} actualizada exitosamente")
-            return FamiliaInDB.model_validate(familia_existente)
+            return familia_existente
             
         except ValueError:
             raise

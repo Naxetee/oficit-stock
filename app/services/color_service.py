@@ -6,6 +6,7 @@ disponibles para productos simples y componentes.
 """
 
 from typing import List, Optional
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -13,6 +14,8 @@ from app.models.color import Color
 from app.models.familia import Familia
 from app.models.producto_simple import ProductoSimple
 from app.models.componente import Componente
+from app.schemas.colorDTO import ColorCreate, ColorResponse, ColorUpdate
+from app.services import familia_service
 from .base_service import BaseService
 import logging
 
@@ -39,46 +42,39 @@ class ColorService(BaseService):
         """
         super().__init__(db_session, Color)
         
-    def crear_color(self, nombre: str, codigo_hex: str = None, url_imagen: str = None,
-                    id_familia: int = None) -> Color:
+    def crear_color(self, color : ColorCreate) -> ColorResponse:
         """
         Crear un nuevo color
         
         Args:
-            nombre (str): Nombre del color (requerido)
-            codigo_hex (str, optional): Código hexadecimal del color
-            url_imagen (str, optional): URL de imagen representativa
-            id_familia (int, optional): ID de la familia asociada
-            
+            color (ColorCreate): Datos del nuevo color a crear
         Returns:
-            Color: Nuevo color creado
-            
+            color (ColorResponse): Color creado con sus datos            
         Raises:
             ValueError: Si la familia no existe
             SQLAlchemyError: Error en la operación de base de datos
         """
         try:
             # Validar que la familia existe si se proporciona
-            if id_familia:
-                familia = self.db.query(Familia).filter(Familia.id == id_familia).first()
+            if color.id_familia:
+                familia_service = familia_service.FamiliaService(self.db)
+                familia = familia_service.obtener_por_id(color.id_familia)
                 if not familia:
-                    raise ValueError(f"La familia con ID {id_familia} no existe")
+                    raise HTTPException(
+                        status_code=404,
+                        detail=f"Familia con ID {color.id_familia} no encontrada"
+                    )
                     
-            color = self.crear(
-                nombre=nombre,
-                codigo_hex=codigo_hex,
-                url_imagen=url_imagen,
-                id_familia=id_familia
-            )
+            nuevo_color = self.crear(**color.model_dump())
             
-            logger.info(f"✅ Color '{nombre}' creado exitosamente")
-            return color
+            logger.info(f"✅ Color '{nuevo_color.nombre}' creado exitosamente")
+            return nuevo_color
             
         except SQLAlchemyError as e:
-            logger.error(f"❌ Error creando color '{nombre}': {e}")
+            logger.error(f"❌ Error creando color '{nuevo_color.nombre}': {e}")
             raise
             
-    def obtener_por_nombre(self, nombre: str) -> Optional[Color]:
+    def obtener_por_nombre(self, nombre: str) -> Optional[ColorResponse]:
         """
         Obtener un color por su nombre
         
@@ -94,7 +90,7 @@ class ColorService(BaseService):
             logger.error(f"❌ Error buscando color por nombre '{nombre}': {e}")
             raise
             
-    def obtener_por_familia(self, familia_id: int) -> List[Color]:
+    def obtener_por_familia(self, familia_id: int) -> List[ColorResponse]:
         """
         Obtener todos los colores de una familia específica
         
@@ -195,7 +191,7 @@ class ColorService(BaseService):
             logger.error(f"❌ Error obteniendo estadísticas de color {color_id}: {e}")
             raise
             
-    def buscar_colores_por_texto(self, texto: str) -> List[Color]:
+    def buscar_colores_por_texto(self, texto: str) -> List[ColorResponse]:
         """
         Buscar colores por texto en nombre
         
@@ -249,7 +245,7 @@ class ColorService(BaseService):
             logger.error(f"❌ Error validando eliminación de color {color_id}: {e}")
             raise
             
-    def obtener_colores_disponibles_para_familia(self, familia_id: int) -> List[Color]:
+    def obtener_colores_disponibles_para_familia(self, familia_id: int) -> List[ColorResponse]:
         """
         Obtener colores disponibles para una familia específica
         (incluyendo colores sin familia asignada)
@@ -267,3 +263,56 @@ class ColorService(BaseService):
         except SQLAlchemyError as e:
             logger.error(f"❌ Error obteniendo colores disponibles para familia {familia_id}: {e}")
             raise
+
+    def actualizar_color(self, color_id: int, color: ColorUpdate) -> ColorResponse:
+        """
+        Actualizar un color existente
+        
+        Args:
+            color_id (int): ID del color a actualizar
+            color (ColorUpdate): Datos actualizados del color
+            
+        Returns:
+            ColorResponse: Color actualizado con sus datos
+        Raises:
+            HTTPException: Si el color no existe o hay un error de validación
+        """
+        try:
+            # Validar que el color existe
+            existing_color = self.obtener_por_id(color_id)
+            if not existing_color:
+                raise HTTPException(status_code=404, detail="Color no encontrado")
+
+            datos_dict = color.model_dump()
+
+            color_con_mismo_nombre = self.db.query(Color).filter(
+                Color.nombre == datos_dict.get('nombre'),
+                Color.id != color_id  # Excluir el color actual
+            ).first()
+            if color_con_mismo_nombre:
+                raise ValueError( detail=f"Ya existe un color con el nombre {datos_dict.get('nombre')}")
+
+            if color.id_familia != existing_color.id_familia:
+                # Validar que la familia existe si se proporciona
+                if color.id_familia:
+                    familia_service = familia_service.FamiliaService(self.db)
+                    familia = familia_service.obtener_por_id(color.id_familia)
+                    if not familia:
+                        raise HTTPException(
+                            status_code=404,
+                            detail=f"Familia con ID {color.id_familia} no encontrada"
+                        )
+            
+            # Actualizar los campos del color
+            for key, value in color.model_dump().items():
+                setattr(existing_color, key, value)
+                
+            self.db.commit()
+            self.db.refresh(existing_color)
+            
+            logger.info(f"✅ Color '{existing_color.nombre}' actualizado exitosamente")
+            return existing_color
+            
+        except SQLAlchemyError as e:
+            logger.error(f"❌ Error actualizando color '{color_id}': {e}")
+            raise HTTPException(status_code=500, detail=f"Error al actualizar color: {str(e)}")

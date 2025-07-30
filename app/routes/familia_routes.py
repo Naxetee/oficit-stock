@@ -11,7 +11,7 @@ from typing import List
 from app.db import SessionLocal
 from app.schemas.articuloDTO import ArticuloInDB
 from app.schemas.colorDTO import ColorInDB
-from app.schemas.familiaDTO import FamiliaInDB, FamiliaCreate, FamiliaUpdate
+from app.schemas.familiaDTO import FamiliaResponse, FamiliaCreate, FamiliaUpdate
 from app.services.familia_service import FamiliaService
 
 router = APIRouter(prefix="/familias", tags=["Familias"])
@@ -27,7 +27,7 @@ def get_db():
 # ENDPOINTS CRUD BÁSICOS
 # ==========================================
 
-@router.get("/", response_model=List[FamiliaInDB], responses={
+@router.get("/", response_model=List[FamiliaResponse], responses={
     200: {"description": "Lista de familias obtenida exitosamente"},
     500: {"description": "Error interno del servidor"}
 })
@@ -58,7 +58,7 @@ def listar_familias(
         )
     
 
-@router.get("/{familia_id}", response_model=FamiliaInDB, responses={
+@router.get("/{familia_id}", response_model=FamiliaResponse, responses={
     200: {"description": "Familia encontrada"},
     404: {"description": "Familia no encontrada"},
     500: {"description": "Error interno del servidor"}
@@ -90,7 +90,7 @@ def obtener_familia(
         )
 
         
-@router.post("/", response_model=FamiliaInDB, status_code=status.HTTP_201_CREATED, responses={
+@router.post("/", response_model=FamiliaResponse, status_code=status.HTTP_201_CREATED, responses={
     201: {"description": "Familia creada exitosamente"},
     400: {"description": "Error en los datos enviados o familia duplicada"}
 })
@@ -119,7 +119,7 @@ def crear_familia(
         )
 
 
-@router.put("/{familia_id}", response_model=FamiliaInDB, responses={
+@router.put("/{familia_id}", response_model=FamiliaResponse, responses={
     200: {"description": "Familia actualizada exitosamente"},
     400: {"description": "Error en los datos enviados"},
     404: {"description": "Familia no encontrada"}
@@ -192,11 +192,7 @@ def eliminar_familia(
             )
         else:        
             success = familia_service.eliminar(id=familia_id)
-        if not success:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Familia no encontrada"
-            )
+
         return {"detail": "Familia eliminada exitosamente"}
     except HTTPException:
         raise
@@ -291,7 +287,7 @@ def obtener_estadisticas_familia(
             detail=f"Error al obtener estadísticas de familia: {str(e)}"
         )
 
-@router.get("/buscar", response_model=List[FamiliaInDB], responses={
+@router.get("/buscar", response_model=List[FamiliaResponse], responses={
     200: {"description": "Resultados de búsqueda"},
     400: {"description": "Parámetros de búsqueda inválidos"},
     500: {"description": "Error interno del servidor"}
@@ -308,7 +304,7 @@ def buscar_familias_por_texto(
     try:
         familia_service = FamiliaService(db)
         familias = familia_service.buscar_familias_por_texto(texto)
-        return [FamiliaInDB.model_validate(familia).model_dump() for familia in familias]
+        return [FamiliaResponse.model_validate(familia).model_dump() for familia in familias]
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

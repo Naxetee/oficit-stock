@@ -23,6 +23,7 @@ class FamiliaUpdate(BaseModel):
         if not v or not v.strip():
             raise ValueError('El nombre no puede estar vacío')
         return v
+    pass
 
 class FamiliaInDB(FamiliaBase):
     id: int
