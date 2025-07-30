@@ -5,8 +5,13 @@ Aplicación principal que coordina todos los endpoints del sistema de inventario
 Organizada por modelos con rutas específicas para cada entidad.
 """
 
+import uvicorn
+import sys
+sys.path.insert(0, "./app/..")
+
 from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 from app.db import SessionLocal
 
 # Importar todos los routers de rutas
@@ -28,7 +33,7 @@ app = FastAPI(
     title="🏢 Oficit Stock Service",
     description="""
     ## Sistema de Inventario Completo
-    
+
     API RESTful para gestión integral de inventario con:
     - 👥 **Familias y Colores**: Organización por categorías
     - 🏢 **Proveedores**: Gestión de proveedores y contactos  
@@ -38,22 +43,23 @@ app = FastAPI(
     - 🏷️ **Productos**: Simples y compuestos
     - 📊 **Stock**: Control de inventario y movimientos
     - 🎯 **Coordinador**: Operaciones complejas del inventario
-    
+
     ### Características:
     - ✅ CRUD completo para todas las entidades
     - ✅ Relaciones complejas entre modelos
     - ✅ Validaciones de integridad
     - ✅ Reportes y análisis avanzados
     - ✅ Sistema de alertas de stock
+
+    ---
+    ## 🔒 Licencia y uso
+
+    > ⚠️ **Este software es propiedad de Tienda Oficit SL. Queda prohibida su copia, distribución o uso fuera de la empresa sin autorización expresa.**
     """,
-    version="2.0.0",
+    version="1.0.0",
     contact={
-        "name": "Equipo Oficit",
-        "email": "tech@oficit.com",
-    },
-    license_info={
-        "name": "MIT License",
-    },
+        "name": "Tienda Oficit SLU",
+    }
 )
 
 def get_db():
@@ -81,6 +87,7 @@ def read_root():
         "estado": "✅ Activo",
         "mensaje": "Sistema de inventario funcionando correctamente",
         "documentacion": "/docs",
+        "estado_del_sistema": "/health",
         "endpoints_disponibles": {
             "familias": "/familias",
             "colores": "/colores", 
@@ -102,7 +109,8 @@ def health_check(db: Session = Depends(get_db)):
     """
     try:
         # Verificar conexión a base de datos
-        db.execute("SELECT 1")
+        q = text('SELECT 1')  # SQL estándar para verificar conexión
+        db.execute(q)
         return {
             "estado": "✅ Saludable",
             "base_datos": "✅ Conectada",
@@ -153,10 +161,9 @@ app.include_router(inventario_router)
 # )
 
 if __name__ == "__main__":
-    import uvicorn
     uvicorn.run(
         "app.main:app", 
-        host="0.0.0.0", 
+        host="localhost", 
         port=8000, 
         reload=True,
         log_level="info"
