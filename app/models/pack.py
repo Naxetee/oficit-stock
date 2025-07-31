@@ -7,9 +7,6 @@ class Pack(Base):
     """
     🎁 Pack - Conjunto de productos que se venden juntos como una oferta especial
     
-    Representa ofertas especiales que combinan múltiples productos en un solo
-    paquete con precio promocional.
-    
     Attributes:
         id (int): Identificador único del pack
         nombre (str): Nombre comercial del pack
@@ -32,7 +29,7 @@ class Pack(Base):
     descripcion = Column(Text)
     
     # Foreign Keys
-    id_articulo = Column(Integer, ForeignKey("articulo.id"), nullable=False, unique=True)
+    id_articulo = Column(Integer, ForeignKey("Articulo.id"), nullable=False, unique=True)
     
     # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now())

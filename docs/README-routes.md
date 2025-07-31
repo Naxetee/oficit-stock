@@ -8,7 +8,6 @@ Esta documentación describe todos los endpoints disponibles en el sistema de in
 - [🏷️ Familias](#️-familias)
 - [🎨 Colores](#-colores)  
 - [🏢 Proveedores](#-proveedores)
-- [💰 Precios](#-precios)
 - [📦 Artículos](#-artículos)
 - [🔧 Componentes](#-componentes)
 - [🏷️ Productos](#️-productos)
@@ -138,40 +137,6 @@ POST /proveedores/
 
 ---
 
-## 💰 Precios
-
-**Base URL:** `/precios`
-
-### Precios de Compra
-
-| Método | Endpoint | Descripción | Parámetros |
-|--------|----------|-------------|------------|
-| `POST` | `/precios/compra` | Crear precio de compra | `valor`, `moneda?`, `fecha_inicio?`, `fecha_fin?` |
-| `GET` | `/precios/compra` | Listar precios de compra | `vigente?`, `skip?`, `limit?` |
-| `GET` | `/precios/compra/{id}` | Obtener precio de compra | `id` |
-| `PUT` | `/precios/compra/{id}` | Actualizar precio de compra | `id`, `valor?`, `moneda?`, `fecha_inicio?`, `fecha_fin?` |
-
-### Precios de Venta
-
-| Método | Endpoint | Descripción | Parámetros |
-|--------|----------|-------------|------------|
-| `POST` | `/precios/venta` | Crear precio de venta | `valor`, `moneda?`, `fecha_inicio?`, `fecha_fin?` |
-| `GET` | `/precios/venta` | Listar precios de venta | `vigente?`, `skip?`, `limit?` |
-| `GET` | `/precios/venta/{id}` | Obtener precio de venta | `id` |
-| `PUT` | `/precios/venta/{id}` | Actualizar precio de venta | `id`, `valor?`, `moneda?`, `fecha_inicio?`, `fecha_fin?` |
-
-**Ejemplo de creación:**
-```json
-POST /precios/compra
-{
-  "valor": 45.50,
-  "moneda": "EUR",
-  "fecha_inicio": "2025-01-01T00:00:00Z"
-}
-```
-
----
-
 ## 📦 Artículos
 
 **Base URL:** `/articulos`
@@ -180,10 +145,10 @@ POST /precios/compra
 
 | Método | Endpoint | Descripción | Parámetros |
 |--------|----------|-------------|------------|
-| `POST` | `/articulos/` | Crear nuevo artículo | `nombre`, `id_familia`, `descripcion?`, `sku?`, `id_precio_venta?` |
+| `POST` | `/articulos/` | Crear nuevo artículo | `nombre`, `id_familia`, `descripcion?`, `sku?` |
 | `GET` | `/articulos/` | Listar artículos | `activo?`, `id_familia?`, `skip?`, `limit?` |
 | `GET` | `/articulos/{id}` | Obtener artículo por ID | `id` |
-| `PUT` | `/articulos/{id}` | Actualizar artículo | `id`, `nombre?`, `descripcion?`, `sku?`, `activo?`, `id_familia?`, `id_precio_venta?` |
+| `PUT` | `/articulos/{id}` | Actualizar artículo | `id`, `nombre?`, `descripcion?`, `sku?`, `activo?`, `id_familia?`|
 | `DELETE` | `/articulos/{id}` | Eliminar artículo | `id` |
 
 ### Endpoints Especializados
@@ -202,7 +167,6 @@ POST /articulos/
   "descripcion": "Smartphone de alta gama",
   "sku": "SPH-PRO-001",
   "id_familia": 1,
-  "id_precio_venta": 2
 }
 ```
 
@@ -216,10 +180,10 @@ POST /articulos/
 
 | Método | Endpoint | Descripción | Parámetros |
 |--------|----------|-------------|------------|
-| `POST` | `/componentes/` | Crear nuevo componente | `nombre`, `descripcion?`, `codigo?`, `especificaciones?`, `id_proveedor?`, `id_precio_compra?`, `id_color?` |
+| `POST` | `/componentes/` | Crear nuevo componente | `nombre`, `descripcion?`, `codigo?`, `especificaciones?`, `id_proveedor?`, `id_color?` |
 | `GET` | `/componentes/` | Listar componentes | `id_proveedor?`, `id_color?`, `skip?`, `limit?` |
 | `GET` | `/componentes/{id}` | Obtener componente por ID | `id` |
-| `PUT` | `/componentes/{id}` | Actualizar componente | `id`, `nombre?`, `descripcion?`, `codigo?`, `especificaciones?`, `id_proveedor?`, `id_precio_compra?`, `id_color?` |
+| `PUT` | `/componentes/{id}` | Actualizar componente | `id`, `nombre?`, `descripcion?`, `codigo?`, `especificaciones?`, `id_proveedor?`, `id_color?` |
 | `DELETE` | `/componentes/{id}` | Eliminar componente | `id` |
 
 **Ejemplo de creación:**
@@ -231,7 +195,6 @@ POST /componentes/
   "codigo": "LCD-55-HD",
   "especificaciones": "1920x1080, 60Hz",
   "id_proveedor": 1,
-  "id_precio_compra": 3,
   "id_color": 2
 }
 ```
@@ -246,7 +209,7 @@ POST /componentes/
 
 | Método | Endpoint | Descripción | Parámetros |
 |--------|----------|-------------|------------|
-| `POST` | `/productos/simple` | Crear producto simple | `id_articulo`, `especificaciones?`, `id_proveedor?`, `id_precio_compra?`, `id_color?` |
+| `POST` | `/productos/simple` | Crear producto simple | `id_articulo`, `especificaciones?`, `id_proveedor?`, `id_color?` |
 
 ### Productos Compuestos
 
@@ -276,7 +239,6 @@ POST /productos/simple
   "id_articulo": 1,
   "especificaciones": "Modelo básico con 64GB",
   "id_proveedor": 1,
-  "id_precio_compra": 5,
   "id_color": 2
 }
 ```
@@ -414,7 +376,6 @@ POST /stock/1/movimiento
 **Parámetros para exportar:**
 - `formato`: Formato de exportación (csv, excel, json)
 - `incluir_stock`: Incluir información de stock (opcional)
-- `incluir_precios`: Incluir información de precios (opcional)
 
 **Ejemplo de búsqueda avanzada:**
 ```json
@@ -462,40 +423,24 @@ POST /proveedores/
   "email": "contact@techprovider.com"
 }
 
-# 4. Crear precio de compra
-POST /precios/compra
-{
-  "valor": 250.00,
-  "moneda": "EUR"
-}
-
-# 5. Crear precio de venta
-POST /precios/venta
-{
-  "valor": 399.00,
-  "moneda": "EUR"
-}
-
-# 6. Crear artículo
+# 4. Crear artículo
 POST /articulos/
 {
   "nombre": "iPhone Pro",
   "sku": "IPH-PRO-001",
   "id_familia": 1,
-  "id_precio_venta": 1
 }
 
-# 7. Crear producto simple
+# 5. Crear producto simple
 POST /productos/simple
 {
   "id_articulo": 1,
   "especificaciones": "128GB, Dual SIM",
   "id_proveedor": 1,
-  "id_precio_compra": 1,
   "id_color": 1
 }
 
-# 8. Crear stock
+# 6. Crear stock
 POST /stock/producto/1
 {
   "cantidad_actual": 50,

@@ -5,13 +5,11 @@
 from .familia import Familia
 from .color import Color
 from .proveedor import Proveedor
-from .precio_venta import PrecioVenta
-from .precio_compra import PrecioCompra
 from .articulo import Articulo
+from .componente import Componente
 from .producto import Producto
 from .producto_simple import ProductoSimple
 from .producto_compuesto import ProductoCompuesto
-from .componente import Componente
 from .pack import Pack
 from .stock import Stock
 
@@ -24,13 +22,11 @@ __all__ = [
     "Familia",
     "Color", 
     "Proveedor",
-    "PrecioVenta",
-    "PrecioCompra",
     "Articulo",
+    "Componente",
     "Producto",
     "ProductoSimple",
     "ProductoCompuesto",
-    "Componente",
     "Pack",
     "Stock",
     "ComponenteProducto",

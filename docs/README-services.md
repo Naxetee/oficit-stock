@@ -11,7 +11,6 @@ app/services/
 ├── familia_service.py       # Gestión de familias de productos
 ├── color_service.py         # Gestión de colores
 ├── proveedor_service.py     # Gestión de proveedores
-├── precio_service.py        # Gestión de precios (venta y compra)
 ├── articulo_service.py      # Gestión de artículos
 ├── producto_service.py      # Gestión de productos (simples y compuestos)
 ├── componente_service.py    # Gestión de componentes
@@ -56,7 +55,6 @@ Clase abstracta que proporciona:
 | `FamiliaService` | Gestión de familias | CRUD, estadísticas, artículos asociados |
 | `ColorService` | Gestión de colores | CRUD, búsqueda, validación hex |
 | `ProveedorService` | Gestión de proveedores | CRUD, validación NIF/CIF, productos |
-| `PrecioService` | Gestión de precios | CRUD precios venta/compra, históricos |
 | `ArticuloService` | Gestión de artículos | CRUD, relaciones polimórficas |
 | `ProductoService` | Gestión de productos | Simple/compuesto, componentes, validaciones |
 | `ComponenteService` | Gestión de componentes | CRUD, integración con stock |
@@ -94,8 +92,6 @@ inventario = InventarioService(db_session)
 # Operación compleja que coordina múltiples servicios
 producto = inventario.crear_producto_simple_completo(
     nombre_articulo="Smartphone",
-    precio_venta=299.99,
-    precio_compra=150.00,
     stock_inicial=50
 )
 ```
@@ -194,7 +190,6 @@ inventario = InventarioService(db_session)
 ```python
 producto = inventario.crear_producto_simple_completo(
     nombre_articulo="Mi Producto",
-    precio_venta=99.99
 )
 ```
 

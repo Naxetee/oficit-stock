@@ -88,39 +88,4 @@ class PackService(BaseService):
     def obtener_productos_del_pack(self, pack_id: int) -> List[PackProducto]:
         """Obtener todos los productos incluidos en un pack"""
         return self.db.query(PackProducto).filter(PackProducto.id_pack == pack_id).all()
-        
-    def calcular_precio_pack(self, pack_id: int) -> Dict[str, Any]:
-        """Calcular el precio total del pack con descuento"""
-        pack = self.obtener_por_id(pack_id)
-        if not pack:
-            return {'error': 'Pack no encontrado'}
-            
-        productos_pack = self.obtener_productos_del_pack(pack_id)
-        precio_total = Decimal('0')
-        detalles = []
-        
-        for pp in productos_pack:
-            if pp.producto.articulo.precio_venta:
-                precio_unitario = pp.producto.articulo.precio_venta.valor
-                precio_linea = precio_unitario * pp.cantidad_incluida
-                precio_total += precio_linea
-                
-                detalles.append({
-                    'producto_id': pp.id_producto,
-                    'nombre': pp.producto.articulo.nombre,
-                    'cantidad': float(pp.cantidad_incluida),
-                    'precio_unitario': float(precio_unitario),
-                    'precio_linea': float(precio_linea)
-                })
-                
-        # Aplicar descuento
-        descuento = (precio_total * pack.descuento_porcentaje) / 100
-        precio_final = precio_total - descuento
-        
-        return {
-            'precio_sin_descuento': float(precio_total),
-            'descuento_porcentaje': pack.descuento_porcentaje,
-            'descuento_cantidad': float(descuento),
-            'precio_final': float(precio_final),
-            'productos': detalles
-        }
+    

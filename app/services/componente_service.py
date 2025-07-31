@@ -23,10 +23,9 @@ class ComponenteService(BaseService):
         
     def crear_componente_completo(self, nombre: str, descripcion: str = None,
                                 codigo: str = None, especificaciones: str = None,
-                                unidad_medida: str = 'unidad', id_proveedor: int = None,
-                                id_precio_compra: int = None, id_color: int = None,
-                                stock_inicial: float = 0, stock_minimo: float = 0,
-                                ubicacion_almacen: str = None) -> Dict[str, Any]:
+                                unidad_medida: str = 'unidad', id_proveedor: int = None, 
+                                id_color: int = None, stock_inicial: float = 0, 
+                                stock_minimo: float = 0, ubicacion_almacen: str = None) -> Dict[str, Any]:
         """Crear componente completo con stock inicial"""
         try:
             # Crear componente
@@ -37,7 +36,6 @@ class ComponenteService(BaseService):
                 especificaciones=especificaciones,
                 unidad_medida=unidad_medida,
                 id_proveedor=id_proveedor,
-                id_precio_compra=id_precio_compra,
                 id_color=id_color
             )
             

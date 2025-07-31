@@ -29,7 +29,6 @@ def crear_articulo(
     id_familia: int,
     descripcion: Optional[str] = None,
     sku: Optional[str] = None,
-    id_precio_venta: Optional[int] = None,
     db: Session = Depends(get_db)
 ):
     """
@@ -42,7 +41,6 @@ def crear_articulo(
             id_familia=id_familia,
             descripcion=descripcion,
             sku=sku,
-            id_precio_venta=id_precio_venta
         )
         return {
             "mensaje": "Artículo creado exitosamente",
@@ -53,7 +51,6 @@ def crear_articulo(
                 "sku": articulo.sku,
                 "activo": articulo.activo,
                 "id_familia": articulo.id_familia,
-                "id_precio_venta": articulo.id_precio_venta
             }
         }
     except Exception as e:
@@ -89,7 +86,6 @@ def listar_articulos(
                 "sku": articulo.sku,
                 "activo": articulo.activo,
                 "id_familia": articulo.id_familia,
-                "id_precio_venta": articulo.id_precio_venta,
                 "created_at": articulo.created_at,
                 "updated_at": articulo.updated_at
             }
@@ -124,7 +120,6 @@ def obtener_articulo(
             "sku": articulo.sku,
             "activo": articulo.activo,
             "id_familia": articulo.id_familia,
-            "id_precio_venta": articulo.id_precio_venta,
             "created_at": articulo.created_at,
             "updated_at": articulo.updated_at
         }
@@ -144,7 +139,6 @@ def actualizar_articulo(
     sku: Optional[str] = None,
     activo: Optional[bool] = None,
     id_familia: Optional[int] = None,
-    id_precio_venta: Optional[int] = None,
     db: Session = Depends(get_db)
 ):
     """
@@ -159,7 +153,6 @@ def actualizar_articulo(
             sku=sku,
             activo=activo,
             id_familia=id_familia,
-            id_precio_venta=id_precio_venta
         )
         if not articulo:
             raise HTTPException(
@@ -175,7 +168,6 @@ def actualizar_articulo(
                 "sku": articulo.sku,
                 "activo": articulo.activo,
                 "id_familia": articulo.id_familia,
-                "id_precio_venta": articulo.id_precio_venta
             }
         }
     except HTTPException:
@@ -293,7 +285,6 @@ def buscar_articulo_por_sku(
             "sku": articulo.sku,
             "activo": articulo.activo,
             "id_familia": articulo.id_familia,
-            "id_precio_venta": articulo.id_precio_venta
         }
     except HTTPException:
         raise

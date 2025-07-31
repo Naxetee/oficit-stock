@@ -11,7 +11,6 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from app.models.articulo import Articulo
 from app.models.familia import Familia
-from app.models.precio_venta import PrecioVenta
 from app.models.producto import Producto
 from app.models.pack import Pack
 from .base_service import BaseService
@@ -27,7 +26,7 @@ class ArticuloService(BaseService):
     Maneja operaciones específicas de artículos incluyendo:
     - CRUD básico de artículos
     - Relación polimórfica con productos y packs
-    - Consultas por familia y precios
+    - Consultas por familia
     - Validaciones de negocio específicas
     """
     
@@ -42,7 +41,7 @@ class ArticuloService(BaseService):
         
     def crear_articulo( self, nombre: str, id_familia: int, 
                         descripcion: str, codigo: str = None, 
-                        activo: bool = False, id_precio_venta: int = None) -> Articulo:
+                        activo: bool = False) -> Articulo:
         """
         Crear un nuevo artículo con validaciones
         
@@ -52,7 +51,6 @@ class ArticuloService(BaseService):
             descripcion (str): Descripción del artículo
             codigo (str, optional): Código único del artículo
             activo (bool, optional): Indica si el artículo está activo
-            id_precio_venta (int, optional): ID del precio de venta
             
         Returns:
             Articulo: Nuevo artículo creado
@@ -67,12 +65,6 @@ class ArticuloService(BaseService):
             if not familia:
                 raise ValueError(f"La familia con ID {id_familia} no existe")
                     
-            # Validar que el precio de venta existe si se proporciona
-            if id_precio_venta:
-                precio = self.db.query(PrecioVenta).filter(PrecioVenta.id == id_precio_venta).first()
-                if not precio:
-                    raise ValueError(f"El precio de venta con ID {id_precio_venta} no existe")
-                    
             # Validar que el código sea único si se proporciona
             if codigo:
                 articulo_existente = self.obtener_por_codigo(codigo)
@@ -85,7 +77,6 @@ class ArticuloService(BaseService):
                 codigo=codigo,
                 activo=activo,
                 id_familia=id_familia,
-                id_precio_venta=id_precio_venta
             )
             
             logger.info(f"✅ Artículo '{nombre}' creado exitosamente")
@@ -142,24 +133,7 @@ class ArticuloService(BaseService):
         except SQLAlchemyError as e:
             logger.error(f"❌ Error obteniendo artículos de familia {familia_id}: {e}")
             raise
-            
-    def obtener_por_precio_venta(self, precio_venta_id: int) -> List[Articulo]:
-        """
-        Obtener todos los artículos con un precio de venta específico
         
-        Args:
-            precio_venta_id (int): ID del precio de venta
-            
-        Returns:
-            List[Articulo]: Lista de artículos con el precio
-        """
-        try:
-            return self.db.query(Articulo).filter(
-                Articulo.id_precio_venta == precio_venta_id
-            ).all()
-        except SQLAlchemyError as e:
-            logger.error(f"❌ Error obteniendo artículos con precio {precio_venta_id}: {e}")
-            raise
             
     def obtener_producto_asociado(self, articulo_id: int) -> Optional[Producto]:
         """
@@ -230,7 +204,6 @@ class ArticuloService(BaseService):
                 - articulo_info: Información básica
                 - tipo: Tipo de artículo (producto/pack)
                 - familia_info: Información de la familia
-                - precio_info: Información del precio de venta
         """
         try:
             articulo = self.obtener_por_id(articulo_id)
@@ -259,18 +232,6 @@ class ArticuloService(BaseService):
                         'id': familia.id,
                         'nombre': familia.nombre,
                         'descripcion': familia.descripcion
-                    }
-                    
-            # Información del precio de venta
-            if articulo.id_precio_venta:
-                precio = self.db.query(PrecioVenta).filter(PrecioVenta.id == articulo.id_precio_venta).first()
-                if precio:
-                    resultado['precio_info'] = {
-                        'id': precio.id,
-                        'valor': float(precio.valor),
-                        'moneda': precio.moneda,
-                        'fecha_inicio': precio.fecha_inicio,
-                        'fecha_fin': precio.fecha_fin
                     }
                     
             return resultado
@@ -360,12 +321,7 @@ class ArticuloService(BaseService):
                 familia = self.db.query(Familia).filter(Familia.id == kwargs['id_familia']).first()
                 if not familia:
                     raise ValueError(f"La familia con ID {kwargs['id_familia']} no existe")
-                    
-            if 'id_precio_venta' in kwargs and kwargs['id_precio_venta']:
-                precio = self.db.query(PrecioVenta).filter(PrecioVenta.id == kwargs['id_precio_venta']).first()
-                if not precio:
-                    raise ValueError(f"El precio de venta con ID {kwargs['id_precio_venta']} no existe")
-                    
+                           
             if 'codigo' in kwargs and kwargs['codigo']:
                 articulo_existente = self.obtener_por_codigo(kwargs['codigo'])
                 if articulo_existente and articulo_existente.id != articulo_id:

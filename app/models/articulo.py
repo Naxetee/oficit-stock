@@ -1,7 +1,6 @@
-from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime, ForeignKey
+from unittest.mock import Base
+from sqlalchemy import Boolean, Column, DateTime, Integer, String, Text, ForeignKey, func
 from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
-from app.db import Base
 
 class Articulo(Base):
     """
@@ -13,10 +12,8 @@ class Articulo(Base):
         codigo (str): Código único del artículo.
         activo (bool): Indica si el artículo está activo.
         id_familia (int): Identificador de la familia a la que pertenece el artículo
-        id_precio_venta (int): Identificador del precio de venta asociado al artículo.
     Relaciones:
         familia (Familia): Relación con la familia del artículo.
-        precio_venta (PrecioVenta): Relación con el precio de venta del artículo.
         producto (Producto): Relación polimórfica con un producto simple.
         pack (Pack): Relación polimórfica con un pack de productos.
     """
@@ -30,7 +27,6 @@ class Articulo(Base):
     
     # Foreign Keys
     id_familia = Column(Integer, ForeignKey("familia.id"), nullable=False)
-    id_precio_venta = Column(Integer, ForeignKey("precio_venta.id"))
     
     # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -38,10 +34,9 @@ class Articulo(Base):
     
     # Relaciones
     familia = relationship("Familia", back_populates="articulos")
-    precio_venta = relationship("PrecioVenta", back_populates="articulos")
-    
-    # Relación polimórfica con Producto o Pack
-    producto = relationship("Producto", back_populates="articulo", uselist=False)
+ 
+    productos = relationship("Producto", back_populates="articulo")
+    # Relación uno a uno con Pack
     pack = relationship("Pack", back_populates="articulo", uselist=False)
     
     @property

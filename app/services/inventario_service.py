@@ -34,7 +34,6 @@ class InventarioService:
         self._familia_service = None
         self._color_service = None
         self._proveedor_service = None
-        self._precio_service = None
         self._articulo_service = None
         self._producto_service = None
         self._componente_service = None
@@ -64,14 +63,6 @@ class InventarioService:
             from .proveedor_service import ProveedorService
             self._proveedor_service = ProveedorService(self.db)
         return self._proveedor_service
-        
-    @property
-    def precio_service(self):
-        """Lazy loading del PrecioService"""
-        if self._precio_service is None:
-            from .precio_service import PrecioService
-            self._precio_service = PrecioService(self.db)
-        return self._precio_service
         
     @property
     def articulo_service(self):
@@ -115,7 +106,6 @@ class InventarioService:
         
     def crear_producto_simple_completo(self, nombre_articulo: str, descripcion_articulo: str = None,
                                      codigo_articulo: str = None, familia_id: int = None,
-                                     precio_venta: float = None, precio_compra: float = None,
                                      proveedor_id: int = None, color_id: int = None,
                                      especificaciones: str = None, stock_inicial: float = 0,
                                      stock_minimo: float = 0, ubicacion_almacen: str = None) -> Dict[str, Any]:
@@ -123,50 +113,31 @@ class InventarioService:
         Crear un producto simple completo con todos sus elementos relacionados
         
         Esta operación crea en una sola transacción:
-        - Precio de venta (si se proporciona)
-        - Precio de compra (si se proporciona)
         - Artículo
         - Producto y ProductoSimple
         - Stock inicial
         """
         try:
             resultado = {}
-            
-            # 1. Crear precio de venta si se proporciona
-            if precio_venta:
-                precio_venta_obj = self.precio_service.crear_precio_venta(precio_venta)
-                resultado['precio_venta'] = precio_venta_obj
-            else:
-                precio_venta_obj = None
                 
-            # 2. Crear precio de compra si se proporciona
-            if precio_compra:
-                precio_compra_obj = self.precio_service.crear_precio_compra(precio_compra)
-                resultado['precio_compra'] = precio_compra_obj
-            else:
-                precio_compra_obj = None
-                
-            # 3. Crear artículo
+            # 1. Crear artículo
             articulo = self.articulo_service.crear_articulo(
                 nombre=nombre_articulo,
                 descripcion=descripcion_articulo,
                 codigo=codigo_articulo,
                 id_familia=familia_id,
-                id_precio_venta=precio_venta_obj.id if precio_venta_obj else None
             )
             resultado['articulo'] = articulo
             
-            # 4. Crear producto simple
+            # 2. Crear producto simple
             producto_data = self.producto_service.crear_producto_simple_completo(
                 id_articulo=articulo.id,
                 especificaciones=especificaciones,
-                id_proveedor=proveedor_id,
-                id_precio_compra=precio_compra_obj.id if precio_compra_obj else None,
-                id_color=color_id
+                i_color=color_id
             )
             resultado.update(producto_data)
             
-            # 5. Crear stock inicial
+            # 3. Crear stock inicial
             from app.models.stock import Stock
             stock = Stock(
                 cantidad_actual=stock_inicial,
@@ -190,7 +161,7 @@ class InventarioService:
             
     def crear_producto_compuesto_completo(self, nombre_articulo: str, descripcion_articulo: str = None,
                                         codigo_articulo: str = None, familia_id: int = None,
-                                        precio_venta: float = None, descripcion_compuesto: str = None,
+                                        descripcion_compuesto: str = None,
                                         componentes_necesarios: List[Dict] = None) -> Dict[str, Any]:
         """
         Crear un producto compuesto completo con componentes
@@ -200,32 +171,24 @@ class InventarioService:
         """
         try:
             resultado = {}
-            
-            # 1. Crear precio de venta si se proporciona
-            if precio_venta:
-                precio_venta_obj = self.precio_service.crear_precio_venta(precio_venta)
-                resultado['precio_venta'] = precio_venta_obj
-            else:
-                precio_venta_obj = None
                 
-            # 2. Crear artículo
+            # 1. Crear artículo
             articulo = self.articulo_service.crear_articulo(
                 nombre=nombre_articulo,
                 descripcion=descripcion_articulo,
                 codigo=codigo_articulo,
                 id_familia=familia_id,
-                id_precio_venta=precio_venta_obj.id if precio_venta_obj else None
             )
             resultado['articulo'] = articulo
             
-            # 3. Crear producto compuesto
+            # 2. Crear producto compuesto
             producto_data = self.producto_service.crear_producto_compuesto_completo(
                 id_articulo=articulo.id,
                 descripcion_compuesto=descripcion_compuesto
             )
             resultado.update(producto_data)
             
-            # 4. Agregar componentes si se proporcionan
+            # 3. Agregar componentes si se proporcionan
             componentes_agregados = []
             if componentes_necesarios:
                 for comp_info in componentes_necesarios:
@@ -247,33 +210,24 @@ class InventarioService:
             raise
             
     def crear_pack_completo(self, nombre_pack: str, descripcion_articulo: str = None,
-                          codigo_articulo: str = None, familia_id: int = None,
-                          precio_venta: float = None, descripcion_pack: str = None,
+                          codigo_articulo: str = None, familia_id: int = None, descripcion_pack: str = None,
                           descuento_porcentaje: int = 0, productos_incluidos: List[Dict] = None) -> Dict[str, Any]:
         """
         Crear un pack completo con productos incluidos
         """
         try:
             resultado = {}
-            
-            # 1. Crear precio de venta si se proporciona
-            if precio_venta:
-                precio_venta_obj = self.precio_service.crear_precio_venta(precio_venta)
-                resultado['precio_venta'] = precio_venta_obj
-            else:
-                precio_venta_obj = None
                 
-            # 2. Crear artículo
+            # 1. Crear artículo
             articulo = self.articulo_service.crear_articulo(
                 nombre=nombre_pack,
                 descripcion=descripcion_articulo,
                 codigo=codigo_articulo,
                 id_familia=familia_id,
-                id_precio_venta=precio_venta_obj.id if precio_venta_obj else None
             )
             resultado['articulo'] = articulo
             
-            # 3. Crear pack completo
+            # 2. Crear pack completo
             pack_data = self.pack_service.crear_pack_completo(
                 nombre=nombre_pack,
                 id_articulo=articulo.id,

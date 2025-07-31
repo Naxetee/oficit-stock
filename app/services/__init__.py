@@ -8,7 +8,6 @@ Servicios disponibles:
 - FamiliaService: Gestión de familias de productos
 - ColorService: Gestión de colores
 - ProveedorService: Gestión de proveedores
-- PrecioService: Gestión de precios de venta y compra
 - ArticuloService: Gestión de artículos
 - ProductoService: Gestión de productos (simples y compuestos)
 - ComponenteService: Gestión de componentes
@@ -20,7 +19,6 @@ Servicios disponibles:
 from .familia_service import FamiliaService
 from .color_service import ColorService
 from .proveedor_service import ProveedorService
-from .precio_service import PrecioService
 from .articulo_service import ArticuloService
 from .producto_service import ProductoService
 from .componente_service import ComponenteService
@@ -32,7 +30,6 @@ __all__ = [
     'FamiliaService',
     'ColorService', 
     'ProveedorService',
-    'PrecioService',
     'ArticuloService',
     'ProductoService',
     'ComponenteService',

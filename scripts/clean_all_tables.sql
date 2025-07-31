@@ -35,7 +35,7 @@ WHERE EXISTS (SELECT 1 FROM pack_producto);
 -- PASO 2: Eliminar registros de tablas intermedias
 -- ================================================
 
--- 2.1 Tabla: producto_simple (depende de producto, proveedor, precio_compra, color)
+-- 2.1 Tabla: producto_simple (depende de producto, proveedor, color)
 DELETE FROM producto_simple 
 WHERE EXISTS (SELECT 1 FROM producto_simple);
 
@@ -55,11 +55,11 @@ WHERE EXISTS (SELECT 1 FROM producto);
 -- PASO 3: Eliminar registros de tablas principales
 -- ================================================
 
--- 3.1 Tabla: componente (depende de proveedor, precio_compra, color)
+-- 3.1 Tabla: componente (depende de proveedor, color)
 DELETE FROM componente 
 WHERE EXISTS (SELECT 1 FROM componente);
 
--- 3.2 Tabla: articulo (depende de familia, precio_venta)
+-- 3.2 Tabla: articulo (depende de familia)
 DELETE FROM articulo 
 WHERE EXISTS (SELECT 1 FROM articulo);
 
@@ -71,19 +71,11 @@ WHERE EXISTS (SELECT 1 FROM color);
 -- PASO 4: Eliminar registros de tablas base
 -- ================================================
 
--- 4.1 Tabla: precio_compra (tabla independiente)
-DELETE FROM precio_compra 
-WHERE EXISTS (SELECT 1 FROM precio_compra);
-
--- 4.2 Tabla: precio_venta (tabla independiente)  
-DELETE FROM precio_venta 
-WHERE EXISTS (SELECT 1 FROM precio_venta);
-
--- 4.3 Tabla: proveedor (tabla independiente)
+-- 4.1 Tabla: proveedor (tabla independiente)
 DELETE FROM proveedor 
 WHERE EXISTS (SELECT 1 FROM proveedor);
 
--- 4.4 Tabla: familia (tabla base)
+-- 4.2 Tabla: familia (tabla base)
 DELETE FROM familia 
 WHERE EXISTS (SELECT 1 FROM familia);
 
@@ -95,8 +87,6 @@ WHERE EXISTS (SELECT 1 FROM familia);
 ALTER SEQUENCE familia_id_seq RESTART WITH 1;
 ALTER SEQUENCE color_id_seq RESTART WITH 1;
 ALTER SEQUENCE proveedor_id_seq RESTART WITH 1;
-ALTER SEQUENCE precio_compra_id_seq RESTART WITH 1;
-ALTER SEQUENCE precio_venta_id_seq RESTART WITH 1;
 ALTER SEQUENCE articulo_id_seq RESTART WITH 1;
 ALTER SEQUENCE componente_id_seq RESTART WITH 1;
 ALTER SEQUENCE pack_id_seq RESTART WITH 1;
@@ -118,10 +108,6 @@ UNION ALL SELECT
     'color' as tabla, COUNT(*) as registros FROM color
 UNION ALL SELECT 
     'proveedor' as tabla, COUNT(*) as registros FROM proveedor
-UNION ALL SELECT 
-    'precio_compra' as tabla, COUNT(*) as registros FROM precio_compra
-UNION ALL SELECT 
-    'precio_venta' as tabla, COUNT(*) as registros FROM precio_venta
 UNION ALL SELECT 
     'articulo' as tabla, COUNT(*) as registros FROM articulo
 UNION ALL SELECT 

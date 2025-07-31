@@ -22,7 +22,6 @@ from app.routes import (
     familia_router,
     color_router,
     proveedor_router,
-    precio_router,
     articulo_router,
     componente_router,
     producto_router,
@@ -40,7 +39,6 @@ app = FastAPI(
     API RESTful para gestión integral de inventario con:
     - 👥 Familias y Colores: Organización por categorías
     - 🏢 Proveedores: Gestión de proveedores y contactos  
-    - 💰 Precios: Control de precios de compra y venta
     - 📦 Artículos: Catálogo base de productos
     - 🔧 Componentes: Elementos para productos compuestos
     - 🏷️ Productos: Simples y compuestos
@@ -129,7 +127,6 @@ def read_root():
             "familias": "/familias",
             "colores": "/colores", 
             "proveedores": "/proveedores",
-            "precios": "/precios",
             "articulos": "/articulos",
             "componentes": "/componentes",
             "productos": "/productos",
@@ -169,7 +166,6 @@ def health_check(db: Session = Depends(get_db)):
 app.include_router(familia_router)
 app.include_router(color_router)
 app.include_router(proveedor_router)
-app.include_router(precio_router)
 
 # Modelos intermedios (dependen de los base)
 app.include_router(articulo_router)

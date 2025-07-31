@@ -24,7 +24,6 @@ def crear_producto_simple(
     id_articulo: int,
     especificaciones: Optional[str] = None,
     id_proveedor: Optional[int] = None,
-    id_precio_compra: Optional[int] = None,
     id_color: Optional[int] = None,
     db: Session = Depends(get_db)
 ):
@@ -35,7 +34,6 @@ def crear_producto_simple(
             id_articulo=id_articulo,
             especificaciones=especificaciones,
             id_proveedor=id_proveedor,
-            id_precio_compra=id_precio_compra,
             id_color=id_color
         )
         return {

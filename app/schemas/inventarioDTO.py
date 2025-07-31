@@ -7,7 +7,6 @@ class MovimientoInventarioBase(BaseModel):
     articulo_id: int = Field(..., description="ID del artículo")
     tipo_movimiento: Literal["entrada", "salida"] = Field(..., description="Tipo de movimiento")
     cantidad: int = Field(..., description="Cantidad del movimiento")
-    precio_unitario: Optional[Decimal] = Field(None, description="Precio unitario")
     motivo: str = Field(..., description="Motivo del movimiento")
     referencia: Optional[str] = Field(None, description="Referencia del documento")
     observaciones: Optional[str] = Field(None, description="Observaciones")

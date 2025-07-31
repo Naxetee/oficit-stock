@@ -1,10 +1,10 @@
 # 🏢 Oficit Stock Service
 
-Microservicio para la gestión avanzada de stock, productos, componentes, packs y precios de Tienda Oficit SL.
+Microservicio para la gestión avanzada de stock, productos, componentes, packs y proveedores de Tienda Oficit SL.
 
 ## 🚀 Descripción general
 
-Este proyecto es el primer microservicio del sistema de digitalización interna de Tienda Oficit SL. Permite gestionar el inventario, la composición de productos, los packs, los proveedores y los precios de compra y venta, con una estructura flexible y escalable.
+Este proyecto es el primer microservicio del sistema de digitalización interna de Tienda Oficit SL. Permite gestionar el inventario, la composición de productos, los packs y los proveedores, con una estructura flexible y escalable.
 
 - Arquitectura orientada a microservicios
 - Gestión detallada de stock y trazabilidad de componentes

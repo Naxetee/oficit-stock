@@ -26,7 +26,6 @@ def crear_componente(
     codigo: Optional[str] = None,
     especificaciones: Optional[str] = None,
     id_proveedor: Optional[int] = None,
-    id_precio_compra: Optional[int] = None,
     id_color: Optional[int] = None,
     db: Session = Depends(get_db)
 ):
@@ -39,7 +38,6 @@ def crear_componente(
             codigo=codigo,
             especificaciones=especificaciones,
             id_proveedor=id_proveedor,
-            id_precio_compra=id_precio_compra,
             id_color=id_color
         )
         return {
@@ -51,7 +49,6 @@ def crear_componente(
                 "codigo": componente.codigo,
                 "especificaciones": componente.especificaciones,
                 "id_proveedor": componente.id_proveedor,
-                "id_precio_compra": componente.id_precio_compra,
                 "id_color": componente.id_color
             }
         }
@@ -83,7 +80,6 @@ def listar_componentes(
                 "codigo": componente.codigo,
                 "especificaciones": componente.especificaciones,
                 "id_proveedor": componente.id_proveedor,
-                "id_precio_compra": componente.id_precio_compra,
                 "id_color": componente.id_color,
                 "created_at": componente.created_at,
                 "updated_at": componente.updated_at
@@ -108,7 +104,6 @@ def obtener_componente(componente_id: int, db: Session = Depends(get_db)):
             "codigo": componente.codigo,
             "especificaciones": componente.especificaciones,
             "id_proveedor": componente.id_proveedor,
-            "id_precio_compra": componente.id_precio_compra,
             "id_color": componente.id_color,
             "created_at": componente.created_at,
             "updated_at": componente.updated_at
@@ -126,7 +121,6 @@ def actualizar_componente(
     codigo: Optional[str] = None,
     especificaciones: Optional[str] = None,
     id_proveedor: Optional[int] = None,
-    id_precio_compra: Optional[int] = None,
     id_color: Optional[int] = None,
     db: Session = Depends(get_db)
 ):
@@ -140,7 +134,6 @@ def actualizar_componente(
             codigo=codigo,
             especificaciones=especificaciones,
             id_proveedor=id_proveedor,
-            id_precio_compra=id_precio_compra,
             id_color=id_color
         )
         if not componente:

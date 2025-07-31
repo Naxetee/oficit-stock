@@ -21,32 +21,14 @@ Este directorio contiene todos los modelos de datos del sistema de inventario, i
 - **Campos**: `nombre`, `nif_cif`, `direccion`, `telefono`, `email`
 - **Relaciones**: Uno a muchos con `ProductoSimple` y `Componente`
 
-### **Modelos de Precios**
-
-#### 💰 **PrecioVenta** (`precio_venta.py`)
-- **Propósito**: Histórico de precios de venta de artículos
-- **Campos**: `valor`, `moneda`, `fecha_inicio`, `fecha_fin`
-- **Restricciones**: 
-  - ✅ `valor > 0` - Precios positivos
-  - ✅ `fecha_fin > fecha_inicio` - Fechas lógicas
-- **Relaciones**: Uno a muchos con `Articulo`
-
-#### 🛒 **PrecioCompra** (`precio_compra.py`)
-- **Propósito**: Histórico de precios de compra
-- **Campos**: `valor`, `moneda`, `fecha_inicio`, `fecha_fin`
-- **Restricciones**: 
-  - ✅ `valor > 0` - Precios positivos
-  - ✅ `fecha_fin > fecha_inicio` - Fechas lógicas
-- **Relaciones**: Uno a muchos con `ProductoSimple` y `Componente`
-
 ### **Modelos Centrales**
 
 #### 📋 **Articulo** (`articulo.py`)
 - **Propósito**: Entidad central que puede ser Producto o Pack
-- **Campos**: `nombre`, `descripcion`, `codigo`, `id_familia`, `id_precio_venta`
+- **Campos**: `nombre`, `descripcion`, `codigo`, `id_familia`,
 - **Relaciones**: 
   - Polimórfica con `Producto` y `Pack`
-  - Muchos a uno con `Familia` y `PrecioVenta`
+  - Muchos a uno con `Familia`
 
 #### 📦 **Producto** (`producto.py`)
 - **Propósito**: Productos que se venden (simples o compuestos)
@@ -59,10 +41,10 @@ Este directorio contiene todos los modelos de datos del sistema de inventario, i
 
 #### 🔧 **ProductoSimple** (`producto_simple.py`)
 - **Propósito**: Productos vendidos tal como se compran
-- **Campos**: `especificaciones`, `id_proveedor`, `id_precio_compra`, `id_color`
+- **Campos**: `especificaciones`, `id_proveedor` `id_color`
 - **Relaciones**: 
   - Uno a uno con `Producto`
-  - Muchos a uno con `Proveedor`, `PrecioCompra`, `Color`
+  - Muchos a uno con `Proveedor`, `Color`
   - Uno a uno con `Stock`
 
 #### ⚙️ **ProductoCompuesto** (`producto_compuesto.py`)
@@ -76,7 +58,7 @@ Este directorio contiene todos los modelos de datos del sistema de inventario, i
 - **Propósito**: Piezas necesarias para ensamblar productos compuestos
 - **Campos**: `nombre`, `descripcion`, `codigo`, `especificaciones`, `unidad_medida`
 - **Relaciones**: 
-  - Muchos a uno con `Proveedor`, `PrecioCompra`, `Color`
+  - Muchos a uno con `Proveedor`, `Color`
   - Uno a uno con `Stock`
   - Muchos a muchos con `ProductoCompuesto` (a través de `ComponenteProducto`)
 
@@ -131,7 +113,7 @@ Este directorio contiene todos los modelos de datos del sistema de inventario, i
 ## 🛡️ Restricciones de Integridad Implementadas
 
 ### **Restricciones de Valor**
-- Todos los precios y cantidades son **positivos**
+- Todos las cantidades son **positivas**
 - Las fechas de fin son **posteriores** a las de inicio
 - Los rangos de stock son **lógicos** (máximo >= mínimo)
 
@@ -158,9 +140,6 @@ Proveedor ──┬── ProductoSimple                                  │
                     │
                    Stock
 
-PrecioVenta ── Articulo
-PrecioCompra ──┬── ProductoSimple  
-               └── Componente
 ```
 
 ## 🚀 Optimizaciones Implementadas
@@ -218,9 +197,6 @@ alertas = service.obtener_alertas_reposicion()  # Productos con stock bajo
 ### **Patrón de Composición**
 - `ProductoCompuesto` se compone de múltiples `Componente`
 - `Pack` agrupa múltiples `Producto`
-
-### **Patrón de Histórico**
-- `PrecioVenta` y `PrecioCompra` mantienen histórico con fechas
 
 ### **Patrón de Servicio**
 - `InventarioService` centraliza la lógica de negocio

@@ -14,7 +14,7 @@ class TestEmptyColorDB:
     def setup_class(cls):
         """
         Se ejecuta una vez antes de todos los tests de la clase.
-        Limpia la tabla de colores en la base de datos.
+        Limpia la base de datos.
         """
         cls.db = SessionLocal()
         try:

@@ -15,7 +15,6 @@ class ProductoSimple(Base):
         especificaciones (str): Detalles técnicos del producto
         id_producto (int): Referencia al producto base (única)
         id_proveedor (int): Referencia al proveedor que lo suministra
-        id_precio_compra (int): Referencia al precio de compra actual
         id_color (int): Referencia al color del producto (opcional)
         id_familia (int, opcional): Referencia a la familia del producto
         created_at (datetime): Fecha y hora de creación
@@ -24,7 +23,6 @@ class ProductoSimple(Base):
     Relationships:
         producto (Producto): Producto base asociado
         proveedor (Proveedor): Proveedor que suministra el producto
-        precio_compra (PrecioCompra): Precio de compra actual
         color (Color): Color del producto (si aplica)
         stock (Stock): Información de stock del producto
     """
@@ -36,7 +34,6 @@ class ProductoSimple(Base):
     # Foreign Keys
     id_producto = Column(Integer, ForeignKey("producto.id"), nullable=False, unique=True)
     id_proveedor = Column(Integer, ForeignKey("proveedor.id"))
-    id_precio_compra = Column(Integer, ForeignKey("precio_compra.id"))
     id_color = Column(Integer, ForeignKey("color.id"))
     id_familia = Column(Integer, ForeignKey("familia.id"))
     
@@ -47,7 +44,6 @@ class ProductoSimple(Base):
     # Relaciones
     producto = relationship("Producto", back_populates="producto_simple")
     proveedor = relationship("Proveedor", back_populates="productos_simples")
-    precio_compra = relationship("PrecioCompra", back_populates="productos_simples")
     color = relationship("Color", back_populates="productos_simples")
     stock = relationship("Stock", back_populates="producto_simple", uselist=False)
     

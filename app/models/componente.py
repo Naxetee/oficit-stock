@@ -1,6 +1,6 @@
-from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime, ForeignKey
+from sqlalchemy import Column, DateTime, Integer, String, Text, DECIMAL, ForeignKey, func
 from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
+
 from app.db import Base
 
 class Componente(Base):
@@ -18,7 +18,6 @@ class Componente(Base):
         especificaciones (str): Especificaciones técnicas
         unidad_medida (str): Unidad de medida (unidad, metro, kg, etc.)
         id_proveedor (int): Referencia al proveedor que lo suministra
-        id_precio_compra (int): Referencia al precio de compra actual
         id_color (int, opcional): Referencia al color del componente
         id_familia (int, opcional): Referencia a la familia del componente
         created_at (datetime): Fecha y hora de creación
@@ -26,7 +25,6 @@ class Componente(Base):
         
     Relationships:
         proveedor (Proveedor): Proveedor que suministra el componente
-        precio_compra (PrecioCompra): Precio de compra actual
         color (Color): Color del componente (si aplica)
         stock (Stock): Información de stock del componente
         componente_productos (List[ComponenteProducto]): Productos que usan este componente
@@ -41,7 +39,6 @@ class Componente(Base):
     
     # Foreign Keys
     id_proveedor = Column(Integer, ForeignKey("proveedor.id"))
-    id_precio_compra = Column(Integer, ForeignKey("precio_compra.id"))
     id_color = Column(Integer, ForeignKey("color.id"))
     
     # Timestamps
@@ -50,10 +47,11 @@ class Componente(Base):
     
     # Relaciones
     proveedor = relationship("Proveedor", back_populates="componentes")
-    precio_compra = relationship("PrecioCompra", back_populates="componentes")
+   
     color = relationship("Color", back_populates="componentes")
     stock = relationship("Stock", back_populates="componente", uselist=False)
-    
+    productos_que_lo_usan = relationship("ProductoComponente", back_populates="componente")
+
     # Relación con productos compuestos (many-to-many a través de tabla intermedia)
     componente_productos = relationship("ComponenteProducto", back_populates="componente")
     

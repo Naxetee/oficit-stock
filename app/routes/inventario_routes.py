@@ -194,7 +194,6 @@ def limpiar_registros_huerfanos(db: Session = Depends(get_db)):
 def exportar_inventario(
     formato: str,  # "csv", "excel", "json"
     incluir_stock: bool = True,
-    incluir_precios: bool = True,
     db: Session = Depends(get_db)
 ):
     """📤 Exportar inventario en diferentes formatos"""
@@ -203,7 +202,7 @@ def exportar_inventario(
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Formato no válido")
         
         inventario_service = InventarioService(db)
-        resultado = inventario_service.exportar_inventario(formato, incluir_stock, incluir_precios)
+        resultado = inventario_service.exportar_inventario(formato, incluir_stock)
         return resultado
     except HTTPException:
         raise
