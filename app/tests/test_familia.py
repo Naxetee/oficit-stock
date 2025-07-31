@@ -1,8 +1,9 @@
 from time import sleep
+from typing import List
 from fastapi.testclient import TestClient
 from app.db import SessionLocal
 from app.main import app
-from app.schemas.familiaDTO import FamiliaCreate
+from app.schemas.familiaDTO import FamiliaCreate, FamiliaResponse
 from app.services.familia_service import FamiliaService
 from sqlalchemy import text
 
@@ -48,7 +49,23 @@ class TestEmptyFamiliaDB:
         cls.db.close()
 
     
-    def test_listar_familias_vacías(self):
+    def test_listar_familias_vacias(self):
+        """
+        Test para obtener una lista de familias vacía
+        """
+        response = client.get("/familias/")
+
+        if response.status_code == 500:
+            try:
+                error_detail = response.json()
+                print(f"Error detail: {error_detail}")
+            except Exception:
+                print("No se pudo parsear el JSON del error")
+
+        assert response.status_code == 200
+        familias = response.json()
+        familia_service = FamiliaService(self.db)
+        assert len(familias) == familia_service.contar()
         """
         Test para obtener una lista de familias vacía
         """

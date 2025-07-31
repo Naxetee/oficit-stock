@@ -1,8 +1,8 @@
-"""Primera migración: tablas iniciales
+"""Initial generation
 
-Revision ID: b0dc83e1269b
+Revision ID: 9e4db7a54ec2
 Revises: 
-Create Date: 2025-07-28 11:40:35.109559
+Create Date: 2025-07-31 11:10:17.319773
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'b0dc83e1269b'
+revision: str = '9e4db7a54ec2'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -31,32 +31,6 @@ def upgrade() -> None:
     sa.UniqueConstraint('nombre')
     )
     op.create_index(op.f('ix_familia_id'), 'familia', ['id'], unique=False)
-    op.create_table('precio_compra',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('valor', sa.Numeric(precision=10, scale=2), nullable=False),
-    sa.Column('moneda', sa.String(length=3), nullable=True),
-    sa.Column('fecha_inicio', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.Column('fecha_fin', sa.DateTime(timezone=True), nullable=True),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
-    sa.CheckConstraint('fecha_fin IS NULL OR fecha_fin > fecha_inicio', name='check_fechas_compra_logicas'),
-    sa.CheckConstraint('valor > 0', name='check_precio_compra_positivo'),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_precio_compra_id'), 'precio_compra', ['id'], unique=False)
-    op.create_table('precio_venta',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('valor', sa.Numeric(precision=10, scale=2), nullable=False),
-    sa.Column('moneda', sa.String(length=3), nullable=True),
-    sa.Column('fecha_inicio', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.Column('fecha_fin', sa.DateTime(timezone=True), nullable=True),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
-    sa.CheckConstraint('fecha_fin IS NULL OR fecha_fin > fecha_inicio', name='check_fechas_venta_logicas'),
-    sa.CheckConstraint('valor > 0', name='check_precio_venta_positivo'),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_precio_venta_id'), 'precio_venta', ['id'], unique=False)
     op.create_table('proveedor',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('nombre', sa.String(length=200), nullable=False),
@@ -75,16 +49,14 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('nombre', sa.String(length=200), nullable=False),
     sa.Column('descripcion', sa.Text(), nullable=True),
-    sa.Column('sku', sa.String(length=50), nullable=True),
+    sa.Column('codigo', sa.String(length=50), nullable=True),
     sa.Column('activo', sa.Boolean(), nullable=True),
     sa.Column('id_familia', sa.Integer(), nullable=False),
-    sa.Column('id_precio_venta', sa.Integer(), nullable=True),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
     sa.ForeignKeyConstraint(['id_familia'], ['familia.id'], ),
-    sa.ForeignKeyConstraint(['id_precio_venta'], ['precio_venta.id'], ),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('sku')
+    sa.UniqueConstraint('codigo')
     )
     op.create_index(op.f('ix_articulo_id'), 'articulo', ['id'], unique=False)
     op.create_table('color',
@@ -94,6 +66,7 @@ def upgrade() -> None:
     sa.Column('url_imagen', sa.String(length=2000), nullable=True),
     sa.Column('activo', sa.Boolean(), nullable=True),
     sa.Column('id_familia', sa.Integer(), nullable=True),
+    sa.Column('descripcion', sa.Text(), nullable=True),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
     sa.ForeignKeyConstraint(['id_familia'], ['familia.id'], ),
@@ -108,12 +81,10 @@ def upgrade() -> None:
     sa.Column('codigo', sa.String(length=50), nullable=True),
     sa.Column('especificaciones', sa.Text(), nullable=True),
     sa.Column('id_proveedor', sa.Integer(), nullable=True),
-    sa.Column('id_precio_compra', sa.Integer(), nullable=True),
     sa.Column('id_color', sa.Integer(), nullable=True),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
     sa.ForeignKeyConstraint(['id_color'], ['color.id'], ),
-    sa.ForeignKeyConstraint(['id_precio_compra'], ['precio_compra.id'], ),
     sa.ForeignKeyConstraint(['id_proveedor'], ['proveedor.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('codigo')
@@ -160,8 +131,10 @@ def upgrade() -> None:
     op.create_table('producto_compuesto',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('id_producto', sa.Integer(), nullable=False),
+    sa.Column('id_familia', sa.Integer(), nullable=True),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
+    sa.ForeignKeyConstraint(['id_familia'], ['familia.id'], ),
     sa.ForeignKeyConstraint(['id_producto'], ['producto.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('id_producto')
@@ -172,12 +145,12 @@ def upgrade() -> None:
     sa.Column('especificaciones', sa.Text(), nullable=True),
     sa.Column('id_producto', sa.Integer(), nullable=False),
     sa.Column('id_proveedor', sa.Integer(), nullable=True),
-    sa.Column('id_precio_compra', sa.Integer(), nullable=True),
     sa.Column('id_color', sa.Integer(), nullable=True),
+    sa.Column('id_familia', sa.Integer(), nullable=True),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
     sa.ForeignKeyConstraint(['id_color'], ['color.id'], ),
-    sa.ForeignKeyConstraint(['id_precio_compra'], ['precio_compra.id'], ),
+    sa.ForeignKeyConstraint(['id_familia'], ['familia.id'], ),
     sa.ForeignKeyConstraint(['id_producto'], ['producto.id'], ),
     sa.ForeignKeyConstraint(['id_proveedor'], ['proveedor.id'], ),
     sa.PrimaryKeyConstraint('id'),
@@ -248,10 +221,6 @@ def downgrade() -> None:
     op.drop_table('articulo')
     op.drop_index(op.f('ix_proveedor_id'), table_name='proveedor')
     op.drop_table('proveedor')
-    op.drop_index(op.f('ix_precio_venta_id'), table_name='precio_venta')
-    op.drop_table('precio_venta')
-    op.drop_index(op.f('ix_precio_compra_id'), table_name='precio_compra')
-    op.drop_table('precio_compra')
     op.drop_index(op.f('ix_familia_id'), table_name='familia')
     op.drop_table('familia')
     # ### end Alembic commands ###

@@ -1,6 +1,7 @@
-from unittest.mock import Base
 from sqlalchemy import Boolean, Column, DateTime, Integer, String, Text, ForeignKey, func
 from sqlalchemy.orm import relationship
+
+from app.db import Base
 
 class Articulo(Base):
     """
@@ -35,7 +36,7 @@ class Articulo(Base):
     # Relaciones
     familia = relationship("Familia", back_populates="articulos")
  
-    productos = relationship("Producto", back_populates="articulo")
+    producto = relationship("Producto", back_populates="articulo")
     # Relación uno a uno con Pack
     pack = relationship("Pack", back_populates="articulo", uselist=False)
     

@@ -50,10 +50,7 @@ class Componente(Base):
    
     color = relationship("Color", back_populates="componentes")
     stock = relationship("Stock", back_populates="componente", uselist=False)
-    productos_que_lo_usan = relationship("ProductoComponente", back_populates="componente")
-
-    # Relación con productos compuestos (many-to-many a través de tabla intermedia)
-    componente_productos = relationship("ComponenteProducto", back_populates="componente")
+    productos_que_lo_usan = relationship("ComponenteProducto", back_populates="componente")
     
     def __repr__(self):
         return f"<Componente(id={self.id}, nombre='{self.nombre}', codigo='{self.codigo}')>"

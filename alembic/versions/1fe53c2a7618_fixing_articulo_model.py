@@ -1,8 +1,8 @@
-"""Añado descripcion a Color
+"""Fixing articulo  model
 
-Revision ID: cb5c12f91d1f
-Revises: 74693726dcb1
-Create Date: 2025-07-30 13:56:14.335083
+Revision ID: 1fe53c2a7618
+Revises: 8e3ebcc6e306
+Create Date: 2025-07-31 11:22:25.109248
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'cb5c12f91d1f'
-down_revision: Union[str, Sequence[str], None] = '74693726dcb1'
+revision: str = '1fe53c2a7618'
+down_revision: Union[str, Sequence[str], None] = '8e3ebcc6e306'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

@@ -42,7 +42,7 @@ class ComponenteProducto(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     
     # Relaciones
-    componente = relationship("Componente", back_populates="componente_productos")
+    componente = relationship("Componente", back_populates="productos_que_lo_usan")
     producto_compuesto = relationship("ProductoCompuesto", back_populates="componente_productos")
     
     def __repr__(self):

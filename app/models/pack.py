@@ -29,7 +29,7 @@ class Pack(Base):
     descripcion = Column(Text)
     
     # Foreign Keys
-    id_articulo = Column(Integer, ForeignKey("Articulo.id"), nullable=False, unique=True)
+    id_articulo = Column(Integer, ForeignKey("articulo.id"), nullable=False, unique=True)
     
     # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now())
