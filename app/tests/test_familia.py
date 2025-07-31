@@ -240,7 +240,8 @@ class TestFamiliaDBWithData:
         assert response.status_code == 200
         familias = response.json()
         assert isinstance(familias, list)
-        assert len(familias) == 1
+        familia_service = FamiliaService(self.db)
+        assert len(familias) == familia_service.contar()
 
     def test_obtener_familia_existente(self):
         """

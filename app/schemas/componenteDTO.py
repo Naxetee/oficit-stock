@@ -42,9 +42,6 @@ class ComponenteInDB(ComponenteBase):
     id: int
     created_at: datetime
     updated_at: Optional[datetime]
-    
-    class Config:
-        from_attributes = True
 
 class ComponenteResponse(ComponenteInDB):
     pass

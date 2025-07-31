@@ -1,7 +1,7 @@
 """
-📦 Rutas para el modelo Artículo
+📦 Rutas para el modelo Articulo
 
-Endpoints RESTful para gestionar los artículos.
+Endpoints RESTful para gestionar los Articulos.
 """
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -12,7 +12,7 @@ from app.db import SessionLocal
 from app.schemas.articuloDTO import ArticuloCreate, ArticuloResponse, ArticuloUpdate
 from app.services.articulo_service import ArticuloService
 
-router = APIRouter(prefix="/articulos", tags=["Artículos"])
+router = APIRouter(prefix="/articulos", tags=["Articulos"])
 
 def get_db():
     db = SessionLocal()
@@ -26,8 +26,8 @@ def get_db():
 # ==========================================
 
 @router.get("/", response_model=List[ArticuloResponse], responses={
-    200: {'description': 'Lista de artículos obtenida exitosamente'},
-    500: {'description': 'Error interno del servidor al listar artículos'}
+    200: {'description': 'Lista de Articulos obtenida exitosamente'},
+    500: {'description': 'Error interno del servidor al listar Articulos'}
     })
 def listar_articulos(
     offset: int = 0,
@@ -35,7 +35,7 @@ def listar_articulos(
     db: Session = Depends(get_db)
 ) -> List[ArticuloResponse]:
     """
-    📋 Obtener lista de artículos con filtros opcionales
+    📋 Obtener lista de Articulos con filtros opcionales
     """
     try:
         articulo_service = ArticuloService(db)
@@ -49,20 +49,20 @@ def listar_articulos(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al listar artículos: {str(e)}"
+            detail=f"Error al listar Articulos: {str(e)}"
         )
 
 @router.get("/{articulo_id}", response_model=ArticuloResponse, responses={
-    200: {'description': 'Artículo obtenido exitosamente'},
-    404: {'description': 'Artículo no encontrado'},
-    500: {'description': 'Error interno del servidor al obtener artículo'}
+    200: {'description': 'Articulo obtenido exitosamente'},
+    404: {'description': 'Articulo no encontrado'},
+    500: {'description': 'Error interno del servidor al obtener Articulo'}
 })
 def obtener_articulo(
     articulo_id: int,
     db: Session = Depends(get_db)
 ) -> ArticuloResponse:
     """
-    🔍 Obtener un artículo específico por ID
+    🔍 Obtener un Articulo específico por ID
     """
     try:
         articulo_service = ArticuloService(db)
@@ -70,7 +70,7 @@ def obtener_articulo(
         if not articulo:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Artículo no encontrado"
+                detail="Articulo no encontrado"
             )
         return articulo
     except HTTPException:
@@ -78,20 +78,20 @@ def obtener_articulo(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al obtener artículo: {str(e)}"
+            detail=f"Error al obtener Articulo: {str(e)}"
         )
 
 @router.post("/", response_model=ArticuloResponse, status_code=status.HTTP_201_CREATED, responses={
-    201: {'description': 'Artículo creado exitosamente'},
-    400: {'description': 'Error al crear artículo'},
-    500: {'description': 'Error interno del servidor al crear artículo'}
+    201: {'description': 'Articulo creado exitosamente'},
+    400: {'description': 'Error al crear Articulo'},
+    500: {'description': 'Error interno del servidor al crear Articulo'}
 })
 def crear_articulo(
     nuevo_articulo: ArticuloCreate,
     db: Session = Depends(get_db)
 ) -> ArticuloResponse:
     """
-    🆕 Crear un nuevo artículo
+    🆕 Crear un nuevo Articulo
     """
     try:
         articulo_service = ArticuloService(db)
@@ -105,14 +105,14 @@ def crear_articulo(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Error al crear artículo: {str(e)}"
+            detail=f"Error al crear Articulo: {str(e)}"
         )
 
 @router.put("/{articulo_id}", response_model=ArticuloResponse, responses={
-    200: {'description': 'Artículo actualizado exitosamente'},
-    404: {'description': 'Artículo no encontrado'},
-    400: {'description': 'Error al actualizar artículo'},
-    500: {'description': 'Error interno del servidor al actualizar artículo'}
+    200: {'description': 'Articulo actualizado exitosamente'},
+    404: {'description': 'Articulo no encontrado'},
+    400: {'description': 'Error al actualizar Articulo'},
+    500: {'description': 'Error interno del servidor al actualizar Articulo'}
 })
 def actualizar_articulo(
     articulo_id: int,
@@ -120,7 +120,7 @@ def actualizar_articulo(
     db: Session = Depends(get_db)
 ) -> ArticuloResponse:
     """
-    ✏️ Actualizar un artículo existente
+    ✏️ Actualizar un Articulo existente
     """
     try:
         articulo_service = ArticuloService(db)
@@ -131,7 +131,7 @@ def actualizar_articulo(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Error al actualizar artículo: {str(e)}"
+            detail=f"Error al actualizar Articulo: {str(e)}"
         )
 
 @router.delete("/{articulo_id}", response_model=dict)
@@ -140,7 +140,7 @@ def eliminar_articulo(
     db: Session = Depends(get_db)
 ) -> dict:
     """
-    🗑️ Eliminar un artículo (soft delete)
+    🗑️ Eliminar un Articulo (soft delete)
     """
     try:
         articulo_service = ArticuloService(db)
@@ -148,7 +148,7 @@ def eliminar_articulo(
         if not articulo_existente:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Artículo no encontrado"
+                detail="Articulo no encontrado"
             )
         success = articulo_service.validar_eliminacion(articulo_id)
         if not success['puede_eliminar']:
@@ -161,14 +161,14 @@ def eliminar_articulo(
                 """
             )
         else:
-            articulo_service.eliminar_articulo(articulo_id)
-        return {"mensaje": "Artículo eliminado exitosamente"}
+            articulo_service.eliminar(articulo_id)
+        return {"detail": "Articulo eliminado exitosamente"}
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Error al eliminar artículo: {str(e)}"
+            detail=f"Error al eliminar Articulo: {str(e)}"
         )
 
 # ==========================================
@@ -181,7 +181,7 @@ def obtener_productos_articulo(
     db: Session = Depends(get_db)
 ):
     """
-    🏷️ Obtener todos los productos de un artículo
+    🏷️ Obtener todos los productos de un Articulo
     """
     try:
         articulo_service = ArticuloService(db)
@@ -199,7 +199,7 @@ def obtener_productos_articulo(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al obtener productos del artículo: {str(e)}"
+            detail=f"Error al obtener productos del Articulo: {str(e)}"
         )
 
 @router.get("/{articulo_id}/packs", response_model=List[dict])
@@ -208,7 +208,7 @@ def obtener_packs_articulo(
     db: Session = Depends(get_db)
 ):
     """
-    📦 Obtener todos los packs de un artículo
+    📦 Obtener todos los packs de un Articulo
     """
     try:
         articulo_service = ArticuloService(db)
@@ -227,7 +227,7 @@ def obtener_packs_articulo(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al obtener packs del artículo: {str(e)}"
+            detail=f"Error al obtener packs del Articulo: {str(e)}"
         )
 
 @router.get("/buscar/sku/{sku}", response_model=dict)
@@ -236,7 +236,7 @@ def buscar_articulo_por_sku(
     db: Session = Depends(get_db)
 ):
     """
-    🔍 Buscar un artículo por su SKU
+    🔍 Buscar un Articulo por su SKU
     """
     try:
         articulo_service = ArticuloService(db)
@@ -244,7 +244,7 @@ def buscar_articulo_por_sku(
         if not articulo:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Artículo con SKU no encontrado"
+                detail="Articulo con SKU no encontrado"
             )
         return {
             "id": articulo.id,
@@ -259,5 +259,5 @@ def buscar_articulo_por_sku(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al buscar artículo por SKU: {str(e)}"
+            detail=f"Error al buscar Articulo por SKU: {str(e)}"
         )

@@ -27,9 +27,6 @@ class MovimientoInventarioInDB(MovimientoInventarioBase):
     stock_nuevo: int
     created_at: datetime
     updated_at: Optional[datetime]
-    
-    class Config:
-        from_attributes = True
 
 class MovimientoInventarioResponse(MovimientoInventarioInDB):
     pass

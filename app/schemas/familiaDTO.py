@@ -29,9 +29,10 @@ class FamiliaInDB(FamiliaBase):
     id: int
     created_at: datetime
     updated_at: Optional[datetime]
-    
-    class Config:
-        from_attributes = True
+
+    model_config = {
+        "from_attributes": True
+    }
 
 class FamiliaResponse(FamiliaInDB):
     pass

@@ -61,9 +61,6 @@ class ProveedorInDB(ProveedorBase):
     id: int
     created_at: datetime
     updated_at: Optional[datetime]
-    
-    class Config:
-        from_attributes = True
 
 class ProveedorResponse(ProveedorInDB):
     pass
