@@ -6,6 +6,7 @@ que son la entidad central que puede ser tanto productos como packs.
 """
 
 from typing import List, Optional, Dict, Any
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -13,6 +14,7 @@ from app.models.articulo import Articulo
 from app.models.familia import Familia
 from app.models.producto import Producto
 from app.models.pack import Pack
+from app.schemas.articuloDTO import ArticuloCreate, ArticuloResponse, ArticuloUpdate
 from .base_service import BaseService
 import logging
 
@@ -39,54 +41,43 @@ class ArticuloService(BaseService):
         """
         super().__init__(db_session, Articulo)
         
-    def crear_articulo( self, nombre: str, id_familia: int, 
-                        descripcion: str, codigo: str = None, 
-                        activo: bool = False) -> Articulo:
+    def crear_articulo( self, nuevo_articulo: ArticuloCreate) -> ArticuloResponse:
         """
         Crear un nuevo artículo con validaciones
         
         Args:
-            nombre (str): Nombre del artículo (requerido)
-            id_familia (int): ID de la familia asociada
-            descripcion (str): Descripción del artículo
-            codigo (str, optional): Código único del artículo
-            activo (bool, optional): Indica si el artículo está activo
-            
+            nuevo_articulo (ArticuloCreate): Datos del artículo a crear
         Returns:
-            Articulo: Nuevo artículo creado
-            
+            articulo (ArticuloResponse): Artículo creado
         Raises:
             ValueError: Si hay errores de validación
             SQLAlchemyError: Error en la operación de base de datos
         """
         try:
             # Validar que la familia existe
-            familia = self.db.query(Familia).filter(Familia.id == id_familia).first()
-            if not familia:
-                raise ValueError(f"La familia con ID {id_familia} no existe")
-                    
+            id_familia = nuevo_articulo.id_familia
+            if id_familia:
+                familia = self.db.query(Familia).filter(Familia.id == id_familia).first()
+                if not familia:
+                    raise ValueError(f"La familia con ID {id_familia} no existe")
+
+            codigo = nuevo_articulo.codigo     
             # Validar que el código sea único si se proporciona
             if codigo:
                 articulo_existente = self.obtener_por_codigo(codigo)
                 if articulo_existente:
                     raise ValueError(f"Ya existe un artículo con el código '{codigo}'")
                     
-            articulo = self.crear(
-                nombre=nombre,
-                descripcion=descripcion,
-                codigo=codigo,
-                activo=activo,
-                id_familia=id_familia,
-            )
+            articulo = self.crear(**nuevo_articulo.model_dump())
             
-            logger.info(f"✅ Artículo '{nombre}' creado exitosamente")
+            logger.info(f"✅ Artículo '{articulo.nombre}' creado exitosamente")
             return articulo
             
         except SQLAlchemyError as e:
-            logger.error(f"❌ Error creando artículo '{nombre}': {e}")
+            logger.error(f"❌ Error creando artículo '{articulo.nombre}': {e}")
             raise
             
-    def obtener_por_nombre(self, nombre: str) -> Optional[Articulo]:
+    def obtener_por_nombre(self, nombre: str) -> Optional[ArticuloResponse]:
         """
         Obtener un artículo por su nombre
         
@@ -94,7 +85,7 @@ class ArticuloService(BaseService):
             nombre (str): Nombre del artículo a buscar
             
         Returns:
-            Optional[Articulo]: Artículo encontrado o None
+            Optional[ArticuloResponse]: Artículo encontrado o None
         """
         try:
             return self.db.query(Articulo).filter(Articulo.nombre == nombre).first()
@@ -102,7 +93,7 @@ class ArticuloService(BaseService):
             logger.error(f"❌ Error buscando artículo por nombre '{nombre}': {e}")
             raise
             
-    def obtener_por_codigo(self, codigo: str) -> Optional[Articulo]:
+    def obtener_por_codigo(self, codigo: str) -> Optional[ArticuloResponse]:
         """
         Obtener un artículo por su código
         
@@ -110,7 +101,7 @@ class ArticuloService(BaseService):
             codigo (str): Código del artículo a buscar
             
         Returns:
-            Optional[Articulo]: Artículo encontrado o None
+            Optional[ArticuloResponse]: Artículo encontrado o None
         """
         try:
             return self.db.query(Articulo).filter(Articulo.codigo == codigo).first()
@@ -118,7 +109,7 @@ class ArticuloService(BaseService):
             logger.error(f"❌ Error buscando artículo por código '{codigo}': {e}")
             raise
             
-    def obtener_por_familia(self, familia_id: int) -> List[Articulo]:
+    def obtener_por_familia(self, familia_id: int) -> List[ArticuloResponse]:
         """
         Obtener todos los artículos de una familia específica
         
@@ -126,7 +117,7 @@ class ArticuloService(BaseService):
             familia_id (int): ID de la familia
             
         Returns:
-            List[Articulo]: Lista de artículos de la familia
+            List[ArticuloResponse]: Lista de artículos de la familia
         """
         try:
             return self.db.query(Articulo).filter(Articulo.id_familia == familia_id).all()
@@ -240,7 +231,7 @@ class ArticuloService(BaseService):
             logger.error(f"❌ Error obteniendo estadísticas de artículo {articulo_id}: {e}")
             raise
             
-    def buscar_articulos_por_texto(self, texto: str) -> List[Articulo]:
+    def buscar_articulos_por_texto(self, texto: str) -> List[ArticuloResponse]:
         """
         Buscar artículos por texto en nombre, descripción o código
         
@@ -248,7 +239,7 @@ class ArticuloService(BaseService):
             texto (str): Texto a buscar
             
         Returns:
-            List[Articulo]: Lista de artículos que coinciden con la búsqueda
+            List[ArticuloResponse]: Lista de artículos que coinciden con la búsqueda
         """
         try:
             return self.db.query(Articulo).filter(
@@ -301,38 +292,54 @@ class ArticuloService(BaseService):
             logger.error(f"❌ Error validando eliminación de artículo {articulo_id}: {e}")
             raise
             
-    def actualizar_articulo(self, articulo_id: int, **kwargs) -> Optional[Articulo]:
+    def actualizar_articulo(self, articulo_id: int, articulo_actualizado: ArticuloUpdate) -> Optional[ArticuloResponse]:
         """
         Actualizar un artículo con validaciones
         
         Args:
             articulo_id (int): ID del artículo a actualizar
-            **kwargs: Campos a actualizar
+            articulo_actualizado (ArticuloUpdate): Datos actualizados del artículo
             
         Returns:
-            Optional[Articulo]: Artículo actualizado o None si no existe
+            Optional[ArticuloResponse]: Artículo actualizado o None si no existe
             
         Raises:
             ValueError: Si hay errores de validación
         """
         try:
-            # Validaciones si se proporcionan estos campos
-            if 'id_familia' in kwargs and kwargs['id_familia']:
-                familia = self.db.query(Familia).filter(Familia.id == kwargs['id_familia']).first()
-                if not familia:
-                    raise ValueError(f"La familia con ID {kwargs['id_familia']} no existe")
-                           
-            if 'codigo' in kwargs and kwargs['codigo']:
-                articulo_existente = self.obtener_por_codigo(kwargs['codigo'])
-                if articulo_existente and articulo_existente.id != articulo_id:
-                    raise ValueError(f"Ya existe otro artículo con el código '{kwargs['codigo']}'")
+            # Verificar si el artículo existe
+            articulo_existente = self.obtener_por_id(articulo_id)
+            if not articulo_existente:
+                raise HTTPException(
+                    status_code=404,
+                    detail="Artículo no encontrado"
+                )
                 
-            if 'activo' in kwargs and  isinstance(kwargs['activo'], bool):
-                raise ValueError("El campo 'activo' debe ser un booleano")
-                    
-            return self.actualizar(articulo_id, **kwargs)
+            # Validaciones si se proporcionan estos campos
+            id_familia = articulo_actualizado.id_familia
+            if id_familia:
+                familia = self.db.query(Familia).filter(Familia.id == id_familia).first()
+                if not familia:
+                    raise ValueError(f"La familia con ID {id_familia} no existe")
+
+            codigo = articulo_actualizado.codigo      
+            if codigo:
+                codigo_existente = self.obtener_por_codigo(codigo)
+                if codigo_existente and codigo_existente.id != articulo_id:
+                    raise ValueError(f"Ya existe otro artículo con el código '{codigo}'")
+ 
+            for key, value in articulo_actualizado.model_dump().items():
+                setattr(articulo_existente, key, value)
+
+            self.db.commit()
+            self.db.refresh(articulo_existente)
+
+            logger.info(f"✅ Artículo {articulo_id} actualizado exitosamente")
+            return articulo_existente
             
         except ValueError:
+            raise
+        except HTTPException:
             raise
         except SQLAlchemyError as e:
             logger.error(f"❌ Error actualizando artículo {articulo_id}: {e}")

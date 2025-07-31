@@ -27,7 +27,7 @@ class Articulo(Base):
     activo = Column(Boolean, default=True)
     
     # Foreign Keys
-    id_familia = Column(Integer, ForeignKey("familia.id"), nullable=False)
+    id_familia = Column(Integer, ForeignKey("familia.id"))
     
     # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now())

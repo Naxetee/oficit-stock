@@ -46,3 +46,8 @@ coverage/
 *.bak
 *.swp
 *.tmp
+
+# Test coverage reports
+**coverage**
+coverage-final.json
+.nyc_output/
