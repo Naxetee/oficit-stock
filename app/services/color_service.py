@@ -15,7 +15,7 @@ from app.models.familia import Familia
 from app.models.producto_simple import ProductoSimple
 from app.models.componente import Componente
 from app.schemas.colorDTO import ColorCreate, ColorResponse, ColorUpdate
-from app.services import familia_service
+from app.services.familia_service import FamiliaService
 from .base_service import BaseService
 import logging
 
@@ -51,7 +51,7 @@ class ColorService(BaseService):
         Returns:
             color (ColorResponse): Color creado con sus datos            
         Raises:
-            ValueError: Si la familia no existe
+            HTTPException: Si hay un error de validación o si el color ya existe
             SQLAlchemyError: Error en la operación de base de datos
         """
         try:
@@ -295,7 +295,7 @@ class ColorService(BaseService):
             if color.id_familia != existing_color.id_familia:
                 # Validar que la familia existe si se proporciona
                 if color.id_familia:
-                    familia_service = familia_service.FamiliaService(self.db)
+                    familia_service = FamiliaService(self.db)
                     familia = familia_service.obtener_por_id(color.id_familia)
                     if not familia:
                         raise HTTPException(

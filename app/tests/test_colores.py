@@ -1,10 +1,8 @@
-import os
 from time import sleep
 from fastapi.testclient import TestClient
 from app.db import SessionLocal
 from app.main import app
-from app.schemas.colorDTO import ColorCreate, ColorUpdate, ColorResponse
-from app.services.color_service import ColorService
+from app.schemas.colorDTO import ColorCreate, ColorUpdate
 from sqlalchemy import text
 
 from app.tests import reset_db
@@ -56,13 +54,6 @@ class TestEmptyColorDB:
         Debe devolver una lista vacía.
         """
         response = client.get("/colores")
-
-        if response.status_code == 500:
-            try:
-                error_detail = response.json()
-                print(f"Error detail: {error_detail}")
-            except:
-                print("No se pudo parsear el JSON del error")
         
         assert response.status_code == 200
         assert response.json() == []
@@ -82,7 +73,7 @@ class TestEmptyColorDB:
         Test para crear un color.
         Debe devolver el color creado con un ID asignado.
         """
-        color_data = ColorCreate(
+        nuevo_color = ColorCreate(
             nombre="Rojo",
             codigo_hex="#FF0000",
             url_imagen="http://example.com/rojo.png",
@@ -91,21 +82,13 @@ class TestEmptyColorDB:
             id_familia=None  # Asumiendo que no se proporciona familia
         )
         
-        response = client.post("/colores", json=color_data.model_dump())
-
-        if response.status_code == 400:
-            try:
-                error_detail = response.json()
-                print(f"Error detail: {error_detail}")
-            except:
-                print("No se pudo parsear el JSON del error")
+        response = client.post("/colores", json=nuevo_color.model_dump())
         
         assert response.status_code == 201
         color = response.json()
-        assert color["nombre"] == color_data.nombre
-        assert color["codigo_hex"] == color_data.codigo_hex
-        assert color["url_imagen"] == color_data.url_imagen
-        assert color["activo"] == color_data.activo
+        nuevo_color = nuevo_color.model_dump()
+        for key in nuevo_color.keys():
+            assert color[key] == nuevo_color[key]
 
     def test_crear_color_sin_nombre(self):
         """
@@ -425,7 +408,7 @@ class TestColorDBWithData:
         
         response = client.post("/colores", json=color_data.model_dump())
         
-        assert response.status_code == 404
+        assert response.status_code == 400
 
     def test_actulizar_color_existente(self):
         """
@@ -531,3 +514,15 @@ class TestColorDBWithData:
         
         assert response.status_code == 200
         assert response.json() == {"detail": "Color eliminado exitosamente"}
+
+    def test_eliminar_color_no_existente(self):
+        """
+        Test para eliminar un color que no existe.
+        Debe devolver un error 404.
+        """
+        response = client.delete("/colores/9999")
+        
+        assert response.status_code == 404
+        assert response.json() == {"detail": "Color no encontrado"}
+
+    

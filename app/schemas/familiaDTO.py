@@ -10,7 +10,7 @@ class FamiliaBase(BaseModel):
 class FamiliaCreate(FamiliaBase):
     @field_validator('nombre')
     def nombre_no_vacio(cls, v):
-        if not v or not v.strip():
+        if len(v.strip()) < 1:
             raise ValueError('El nombre no puede estar vacío')
         return v
     pass
@@ -20,7 +20,7 @@ class FamiliaUpdate(BaseModel):
     descripcion: Optional[str] = Field(None, description="Descripción detallada de la familia")
     @field_validator('nombre')
     def nombre_no_vacio(cls, v):
-        if not v or not v.strip():
+        if len(v.strip()) < 1:
             raise ValueError('El nombre no puede estar vacío')
         return v
     pass

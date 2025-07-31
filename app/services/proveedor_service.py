@@ -6,13 +6,15 @@ incluyendo validaciones de datos y consultas de productos suministrados.
 """
 
 from typing import List, Optional
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
-import re
 
 from app.models.proveedor import Proveedor
 from app.models.producto_simple import ProductoSimple
 from app.models.componente import Componente
+from app.schemas.componenteDTO import ComponenteResponse
+from app.schemas.proveedorDTO import ProveedorCreate, ProveedorResponse, ProveedorUpdate
 from .base_service import BaseService
 import logging
 
@@ -39,56 +41,39 @@ class ProveedorService(BaseService):
         """
         super().__init__(db_session, Proveedor)
         
-    def crear_proveedor(self, nombre: str, nif_cif: str = None, 
-                       direccion: str = None, telefono: str = None, 
-                       email: str = None) -> Proveedor:
+    def crear_proveedor(self, nuevo_proveedor : ProveedorCreate) -> ProveedorResponse:
         """
         Crear un nuevo proveedor con validaciones
         
         Args:
-            nombre (str): Nombre del proveedor (requerido)
-            nif_cif (str, optional): NIF o CIF del proveedor
-            direccion (str, optional): Dirección del proveedor
-            telefono (str, optional): Teléfono de contacto
-            email (str, optional): Email de contacto
-            
+            nuevo_proveedor (ProveedorCreate): Datos del nuevo proveedor
         Returns:
-            Proveedor: Nuevo proveedor creado
+            Proveedor (ProveedorResponse): Nuevo proveedor creado
             
         Raises:
             ValueError: Si hay errores de validación
             SQLAlchemyError: Error en la operación de base de datos
         """
         try:
-            # Validaciones de datos
-            if nif_cif and not self._validar_nif_cif(nif_cif):
-                raise ValueError(f"El NIF/CIF '{nif_cif}' no tiene un formato válido")
-                
-            if email and not self._validar_email(email):
-                raise ValueError(f"El email '{email}' no tiene un formato válido")
-                
+            nif_cif = nuevo_proveedor.nif_cif
+            nombre = nuevo_proveedor.nombre
             # Verificar que no exista un proveedor con el mismo NIF/CIF
-            if nif_cif:
-                proveedor_existente = self.obtener_por_nif_cif(nif_cif)
-                if proveedor_existente:
-                    raise ValueError(f"Ya existe un proveedor con NIF/CIF '{nif_cif}'")
+            if nif_cif and self.obtener_por_nif_cif(nif_cif):
+                raise ValueError(f"Ya existe un proveedor con NIF/CIF '{nif_cif}'")
+
+            if self.obtener_por_nombre(nombre):
+                raise ValueError(f"Ya existe un proveedor con nombre '{nombre}'")
                     
-            proveedor = self.crear(
-                nombre=nombre,
-                nif_cif=nif_cif,
-                direccion=direccion,
-                telefono=telefono,
-                email=email
-            )
+            proveedor = self.crear(**nuevo_proveedor.model_dump())
             
-            logger.info(f"✅ Proveedor '{nombre}' creado exitosamente")
+            logger.info(f"✅ Proveedor '{nuevo_proveedor.nombre}' creado exitosamente")
             return proveedor
             
         except SQLAlchemyError as e:
-            logger.error(f"❌ Error creando proveedor '{nombre}': {e}")
+            logger.error(f"❌ Error creando proveedor '{nuevo_proveedor.nombre}': {e}")
             raise
             
-    def obtener_por_nombre(self, nombre: str) -> Optional[Proveedor]:
+    def obtener_por_nombre(self, nombre: str) -> Optional[ProveedorResponse]:
         """
         Obtener un proveedor por su nombre
         
@@ -96,7 +81,7 @@ class ProveedorService(BaseService):
             nombre (str): Nombre del proveedor a buscar
             
         Returns:
-            Optional[Proveedor]: Proveedor encontrado o None
+            Optional[ProveedorResponse]: Proveedor encontrado o None
         """
         try:
             return self.db.query(Proveedor).filter(Proveedor.nombre == nombre).first()
@@ -104,7 +89,7 @@ class ProveedorService(BaseService):
             logger.error(f"❌ Error buscando proveedor por nombre '{nombre}': {e}")
             raise
             
-    def obtener_por_nif_cif(self, nif_cif: str) -> Optional[Proveedor]:
+    def obtener_por_nif_cif(self, nif_cif: str) -> Optional[ProveedorResponse]:
         """
         Obtener un proveedor por su NIF/CIF
         
@@ -112,7 +97,7 @@ class ProveedorService(BaseService):
             nif_cif (str): NIF/CIF del proveedor a buscar
             
         Returns:
-            Optional[Proveedor]: Proveedor encontrado o None
+            Optional[ProveedorResponse]: Proveedor encontrado o None
         """
         try:
             return self.db.query(Proveedor).filter(Proveedor.nif_cif == nif_cif).first()
@@ -138,7 +123,7 @@ class ProveedorService(BaseService):
             logger.error(f"❌ Error obteniendo productos de proveedor {proveedor_id}: {e}")
             raise
             
-    def obtener_componentes_suministrados(self, proveedor_id: int) -> List[Componente]:
+    def obtener_componentes_suministrados(self, proveedor_id: int) -> List[ComponenteResponse]:
         """
         Obtener todos los componentes suministrados por un proveedor
         
@@ -146,7 +131,7 @@ class ProveedorService(BaseService):
             proveedor_id (int): ID del proveedor
             
         Returns:
-            List[Componente]: Lista de componentes suministrados
+            List[ComponenteResponse]: Lista de componentes suministrados
         """
         try:
             return self.db.query(Componente).filter(
@@ -197,7 +182,7 @@ class ProveedorService(BaseService):
             logger.error(f"❌ Error obteniendo estadísticas de proveedor {proveedor_id}: {e}")
             raise
             
-    def buscar_proveedores_por_texto(self, texto: str) -> List[Proveedor]:
+    def buscar_proveedores_por_texto(self, texto: str) -> List[ProveedorResponse]:
         """
         Buscar proveedores por texto en nombre, NIF/CIF o email
         
@@ -205,7 +190,7 @@ class ProveedorService(BaseService):
             texto (str): Texto a buscar
             
         Returns:
-            List[Proveedor]: Lista de proveedores que coinciden con la búsqueda
+            List[ProveedorResponse]: Lista de proveedores que coinciden con la búsqueda
         """
         try:
             return self.db.query(Proveedor).filter(
@@ -252,43 +237,8 @@ class ProveedorService(BaseService):
         except SQLAlchemyError as e:
             logger.error(f"❌ Error validando eliminación de proveedor {proveedor_id}: {e}")
             raise
-            
-    def _validar_nif_cif(self, nif_cif: str) -> bool:
-        """
-        Validar formato de NIF/CIF español
         
-        Args:
-            nif_cif (str): NIF/CIF a validar
-            
-        Returns:
-            bool: True si el formato es válido
-        """
-        if not nif_cif:
-            return False
-            
-        # Patrón básico para NIF (8 dígitos + letra) o CIF (letra + 7 dígitos + carácter)
-        patron_nif = r'^\d{8}[A-Za-z]$'
-        patron_cif = r'^[A-Za-z]\d{7}[0-9A-Za-z]$'
-        
-        return bool(re.match(patron_nif, nif_cif) or re.match(patron_cif, nif_cif))
-        
-    def _validar_email(self, email: str) -> bool:
-        """
-        Validar formato de email
-        
-        Args:
-            email (str): Email a validar
-            
-        Returns:
-            bool: True si el formato es válido
-        """
-        if not email:
-            return False
-            
-        patron_email = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-        return bool(re.match(patron_email, email))
-        
-    def actualizar_proveedor(self, proveedor_id: int, **kwargs) -> Optional[Proveedor]:
+    def actualizar_proveedor(self, proveedor_id: int, proveedor: ProveedorUpdate) -> Optional[ProveedorResponse]:
         """
         Actualizar un proveedor con validaciones
         
@@ -303,24 +253,35 @@ class ProveedorService(BaseService):
             ValueError: Si hay errores de validación
         """
         try:
-            # Validaciones si se proporcionan estos campos
-            if 'nif_cif' in kwargs and kwargs['nif_cif']:
-                if not self._validar_nif_cif(kwargs['nif_cif']):
-                    raise ValueError(f"El NIF/CIF '{kwargs['nif_cif']}' no tiene un formato válido")
-                    
-                # Verificar que no exista otro proveedor con el mismo NIF/CIF
-                proveedor_existente = self.obtener_por_nif_cif(kwargs['nif_cif'])
-                if proveedor_existente and proveedor_existente.id != proveedor_id:
-                    raise ValueError(f"Ya existe otro proveedor con NIF/CIF '{kwargs['nif_cif']}'")
-                    
-            if 'email' in kwargs and kwargs['email']:
-                if not self._validar_email(kwargs['email']):
-                    raise ValueError(f"El email '{kwargs['email']}' no tiene un formato válido")
-                    
-            return self.actualizar(proveedor_id, **kwargs)
+            existing_proveedor = self.obtener_por_id(proveedor_id)
+            if not existing_proveedor:
+                raise HTTPException(
+                    status_code=404,
+                    detail="Proveedor no encontrado"
+                )
+            
+            # Verificar que no exista otro proveedor con el mismo NIF/CIF
+            nif_cif = proveedor.nif_cif
+            nombre = proveedor.nombre
+            proveedor_existente = self.obtener_por_nif_cif(nif_cif)
+            if proveedor_existente and proveedor_existente.id != proveedor_id:
+                raise ValueError(f"Ya existe otro proveedor con NIF/CIF '{nif_cif}'")
+            proveedor_existente = self.obtener_por_nombre(nombre)
+            if proveedor_existente and proveedor_existente.id != proveedor_id:
+                raise ValueError(f"Ya existe otro proveedor con nombre '{nombre}'")
+            
+            # Actualizar los campos del color
+            for key, value in proveedor.model_dump().items():
+                setattr(existing_proveedor, key, value)  
+
+            self.db.commit()
+            self.db.refresh(existing_proveedor)
+
+            logger.info(f"✅ Proveedor {proveedor_id} actualizado exitosamente")
+            return existing_proveedor
             
         except ValueError:
             raise
         except SQLAlchemyError as e:
-            logger.error(f"❌ Error actualizando proveedor {proveedor_id}: {e}")
-            raise
+            logger.error(f"❌ Error actualizando proveedor '{proveedor_id}': {e}")
+            raise HTTPException(status_code=500, detail=f"Error al actualizar proveedor: {str(e)}")

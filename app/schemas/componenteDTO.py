@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field, field_validator
 from typing import Optional
 from datetime import datetime
 
-class ColorBase(BaseModel):
+class ComponenteBase(BaseModel):
     nombre: str = Field(..., description="Nombre del color")
     codigo_hex: Optional[str] = Field(None, description="Código hexadecimal del color")
     descripcion: Optional[str] = Field(None, description="Descripción del color")
@@ -10,7 +10,7 @@ class ColorBase(BaseModel):
     activo: bool = Field(True, description="Estado del color")
     url_imagen: Optional[str] = Field(None, description="URL de imagen representativa del color")
 
-class ColorCreate(ColorBase):
+class ComponenteCreate(ComponenteBase):
     @field_validator('nombre')
     def nombre_no_vacio(cls, v):
         if len(v.strip()) < 1:
@@ -25,7 +25,7 @@ class ColorCreate(ColorBase):
         return v
     pass
 
-class ColorUpdate(BaseModel):
+class ComponenteUpdate(BaseModel):
     nombre: Optional[str] = Field(None, description="Nombre del color")
     codigo_hex: Optional[str] = Field(None, description="Código hexadecimal del color")
     descripcion: Optional[str] = Field(None, description="Descripción del color")
@@ -38,7 +38,7 @@ class ColorUpdate(BaseModel):
             raise ValueError('El nombre no puede estar vacío')
         return v
     pass
-class ColorInDB(ColorBase):
+class ComponenteInDB(ComponenteBase):
     id: int
     created_at: datetime
     updated_at: Optional[datetime]
@@ -46,5 +46,5 @@ class ColorInDB(ColorBase):
     class Config:
         from_attributes = True
 
-class ColorResponse(ColorInDB):
+class ComponenteResponse(ComponenteInDB):
     pass
