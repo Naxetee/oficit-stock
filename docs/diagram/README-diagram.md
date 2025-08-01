@@ -1,108 +1,230 @@
-# 📦 Modelo de Datos: Gestión de Stock y Productos
+# oficit-stock documentation
+## Summary
 
-Este documento describe el modelo entidad-relación diseñado para la gestión avanzada de stock, productos, componentes, packs y precios en la empresa. El objetivo es ofrecer una estructura flexible, escalable y trazable para la digitalización de los procesos internos.
+- [Introduction](#introduction)
+- [Database Type](#database-type)
+- [Table Structure](#table-structure)
+	- [Componente](#componente)
+	- [Proveedor](#proveedor)
+	- [Color](#color)
+	- [Familia](#familia)
+	- [Articulo](#articulo)
+	- [Producto_Simple](#producto_simple)
+	- [Producto_Compuesto](#producto_compuesto)
+	- [Composicion_Prod.Compuesto](#composicion_prod.compuesto)
+	- [Pack](#pack)
+	- [Composicion_Pack](#composicion_pack)
+	- [Producto](#producto)
+- [Relationships](#relationships)
+- [Database Diagram](#database-diagram)
 
----
+## Introduction
 
-## 🗂️ Entidades
+## Database type
 
-### 1. 🏷️ **Familia**
-Agrupa y clasifica los artículos en categorías lógicas (por ejemplo: mesas, sillas, accesorios). Facilita la organización, búsqueda y análisis de productos.
+- **Database system:** PostgreSQL
+## Table structure
 
-### 2. 🎨 **Color**
-Define los colores disponibles para productos simples y componentes, permitiendo gestionar variantes y opciones de personalización.
+### Componente
 
-### 3. 🏢 **Proveedor**
-Almacena la información de los proveedores que suministran productos simples y componentes. Es fundamental para la gestión de compras y relaciones comerciales.
+| Name        | Type          | Settings                      | References                    | Note                           |
+|-------------|---------------|-------------------------------|-------------------------------|--------------------------------|
+| **id** | INTEGER | 🔑 PK, not null, unique, autoincrement | Componente(1)-Composiciones(n) | |
+| **nombre** | VARCHAR(255) | not null, unique |  | |
+| **descripcion** | TEXT | null |  | |
+| **id_proveedor** | INTEGER | null |  | |
+| **id_color** | INTEGER | null |  | | 
 
-### 4. 💰 **Precio_Venta**
-Registra los precios de venta de los artículos. Permite mantener un histórico de precios y gestionar cambios de forma controlada.
 
-### 5. 🛒 **Precio_Compra**
-Registra los precios de compra de productos simples y componentes. Permite mantener un histórico de costes y analizar márgenes.
+### Proveedor
 
-### 6. 📄 **Artículo**
-Entidad central que representa cualquier elemento gestionado en el inventario o vendido: producto, componente o pack. Se relaciona con familia y precio de venta.
+| Name        | Type          | Settings                      | References                    | Note                           |
+|-------------|---------------|-------------------------------|-------------------------------|--------------------------------|
+| **id** | INTEGER | 🔑 PK, not null, unique, autoincrement | Proveedor(1)-Componentes(n),Proveedor(1)-ProductosSimples(n) | |
+| **nombre** | VARCHAR(127) | not null, unique |  | |
+| **telefono** | VARCHAR(31) | null |  | |
+| **email** | VARCHAR(127) | null |  | |
+| **direccion** | VARCHAR(255) | null |  | |
+| **activo** | BOOLEAN | null, default: False |  | | 
 
-### 7. 📦 **Producto**
-Representa un producto final que se vende. Puede ser de tipo simple o compuesto.
 
-### 8. 🪑 **Producto_Simple**
-Producto que se vende tal cual, sin estar formado por otros componentes internos (por ejemplo, una silla comprada a un proveedor).
+### Color
 
-### 9. 🛠️ **Producto_Compuesto**
-Producto que se ensambla a partir de varios componentes (por ejemplo, una mesa formada por tablero, patas y estructura).
+| Name        | Type          | Settings                      | References                    | Note                           |
+|-------------|---------------|-------------------------------|-------------------------------|--------------------------------|
+| **id** | INTEGER | 🔑 PK, not null, unique, autoincrement | Color(1)-Componentes(n),Color(1)-Prod.Simples(n) | |
+| **nombre** | VARCHAR(31) | not null, unique |  | |
+| **hex** | VARCHAR(7) | null |  | |
+| **url_imagen** | VARCHAR(511) | null |  | |
+| **id_familia** | INTEGER | null |  | | 
 
-### 10. 🔩 **Componente**
-Partes individuales que se compran a proveedores y se utilizan para fabricar productos compuestos (por ejemplo, tablero, pata, tornillo).
 
-### 11. 🎁 **Pack**
-Conjunto de productos que se venden juntos como una oferta especial.
+### Familia
 
-### 12. 🏬 **Stock**
-Registra la cantidad disponible de productos simples y componentes en el almacén.
+| Name        | Type          | Settings                      | References                    | Note                           |
+|-------------|---------------|-------------------------------|-------------------------------|--------------------------------|
+| **id** | INTEGER | 🔑 PK, not null, unique, autoincrement | Familia(1)-Colores(n),Familia(1)-Articulos(n) | |
+| **nombre** | VARCHAR(127) | not null, unique |  | |
+| **descripcion** | TEXT | null |  | | 
 
----
 
-## 🔗 Relaciones
+### Articulo
 
-### 1. 📄 **Artículo – Familia**
-Cada artículo pertenece a una familia, lo que permite su clasificación y organización.
+| Name        | Type          | Settings                      | References                    | Note                           |
+|-------------|---------------|-------------------------------|-------------------------------|--------------------------------|
+| **id** | INTEGER | 🔑 PK, not null, unique, autoincrement |  | |
+| **nombre** | VARCHAR(255) | null |  | |
+| **descripcion** | TEXT | null |  | |
+| **codigo_tienda** | VARCHAR(31) | null, unique |  | |
+| **id_familia** | INTEGER | null |  | |
+| **activo** | BOOLEAN | null, default: False |  | |
+| **tipo** | VARCHAR(255) | not null |  | | 
 
-### 2. 📄 **Artículo – Precio_Venta**
-Cada artículo tiene asociado un precio de venta actual, permitiendo la gestión y actualización de precios de forma centralizada.
 
-### 3. 📦 **Producto – Artículo**
-Cada producto está vinculado a un artículo, heredando su información general y permitiendo su gestión como elemento vendible.
+### Producto_Simple
 
-### 4. 📦 **Producto – Producto_Simple**
-Un producto puede ser de tipo simple, en cuyo caso se detalla en la entidad Producto_Simple.
+| Name        | Type          | Settings                      | References                    | Note                           |
+|-------------|---------------|-------------------------------|-------------------------------|--------------------------------|
+| **id** | INTEGER | 🔑 PK, not null, unique, autoincrement |  | |
+| **id_proveedor** | INTEGER | null |  | |
+| **id_color** | INTEGER | null |  | | 
 
-### 5. 📦 **Producto – Producto_Compuesto**
-Un producto puede ser de tipo compuesto, en cuyo caso se detalla en la entidad Producto_Compuesto.
 
-### 6. 🪑 **Producto_Simple – Proveedor**
-Cada producto simple puede estar asociado a un proveedor, indicando quién lo suministra.
+### Producto_Compuesto
 
-### 7. 🪑 **Producto_Simple – Precio_Compra**
-Cada producto simple tiene asociado un precio de compra, permitiendo el control de costes y márgenes.
+| Name        | Type          | Settings                      | References                    | Note                           |
+|-------------|---------------|-------------------------------|-------------------------------|--------------------------------|
+| **id** | INTEGER | 🔑 PK, not null, unique, autoincrement |  | | 
 
-### 8. 🪑 **Producto_Simple – Color**
-Un producto simple puede estar disponible en varios colores, gestionando así las variantes de producto.
 
-### 9. 🪑 **Producto_Simple – Stock**
-Cada producto simple tiene su cantidad registrada en stock, permitiendo el control de inventario.
+### Composicion_Prod.Compuesto
 
-### 10. 🛠️ **Producto_Compuesto – Precio_Compra**
-Cada producto compuesto puede tener un precio de compra asignado, ya sea calculado o manual.
+| Name        | Type          | Settings                      | References                    | Note                           |
+|-------------|---------------|-------------------------------|-------------------------------|--------------------------------|
+| **id_producto_compuesto** | INTEGER | 🔑 PK, null | ProductoCompuesto(1)-Composiciones(n) | |
+| **id_componente** | INTEGER | 🔑 PK, null |  | |
+| **cantidad** | INTEGER | null |  | | 
 
-### 11. 🛠️ **Producto_Compuesto – Componente**
-Un producto compuesto está formado por uno o varios componentes, especificando la cantidad necesaria de cada uno.
 
-### 12. 🔩 **Componente – Proveedor**
-Cada componente puede estar asociado a un proveedor, indicando quién lo suministra.
+### Pack
 
-### 13. 🔩 **Componente – Precio_Compra**
-Cada componente tiene asociado un precio de compra, permitiendo el control de costes de fabricación.
+| Name        | Type          | Settings                      | References                    | Note                           |
+|-------------|---------------|-------------------------------|-------------------------------|--------------------------------|
+| **id** | INTEGER | 🔑 PK, not null, unique, autoincrement | Pack(1)-Composiciones(n) | | 
 
-### 14. 🔩 **Componente – Color**
-Un componente puede estar disponible en varios colores, gestionando así las variantes de componentes.
 
-### 15. 🔩 **Componente – Stock**
-Cada componente tiene su cantidad registrada en stock, permitiendo el control de inventario de materiales.
+### Composicion_Pack
 
-### 16. 🎁 **Pack – Artículo**
-Cada pack está vinculado a un artículo, permitiendo su gestión como elemento vendible.
+| Name        | Type          | Settings                      | References                    | Note                           |
+|-------------|---------------|-------------------------------|-------------------------------|--------------------------------|
+| **id_pack** | INTEGER | 🔑 PK, not null, unique, autoincrement |  | |
+| **id_producto** | INTEGER | 🔑 PK, not null |  | |
+| **cantidad** | INTEGER | not null, default: 0 |  | | 
 
-### 17. 🎁 **Pack – Producto**
-Un pack está formado por uno o varios productos, especificando la cantidad de cada uno.
 
----
+### Producto
 
-## 📝 Notas adicionales
+| Name        | Type          | Settings                      | References                    | Note                           |
+|-------------|---------------|-------------------------------|-------------------------------|--------------------------------|
+| **id** | INTEGER | 🔑 PK, not null, unique, autoincrement | Producto(1)-Composiciones(n) | | 
 
-- El modelo permite la trazabilidad completa de cada producto, desde la compra de componentes hasta la venta final.
-- La gestión de precios separa claramente el precio de compra y el de venta, facilitando el análisis de márgenes y la actualización de tarifas.
-- La estructura es flexible y permite añadir nuevas variantes, proveedores, colores o familias sin afectar la integridad del sistema.
 
----
+## Relationships
+
+- **Familia to Color**: one_to_many
+- **Proveedor to Componente**: one_to_many
+- **Familia to Articulo**: one_to_many
+- **Proveedor to Producto_Simple**: one_to_many
+- **Composicion_Prod.Compuesto to Producto_Compuesto**: many_to_one
+- **Componente to Composicion_Prod.Compuesto**: one_to_many
+- **Pack to Composicion_Pack**: one_to_many
+- **Producto to Composicion_Pack**: one_to_many
+- **Color to Componente**: one_to_many
+- **Color to Producto_Simple**: one_to_many
+
+## Database Diagram
+
+```mermaid
+erDiagram
+	Familia ||--o{ Color : references
+	Proveedor ||--o{ Componente : references
+	Familia ||--o{ Articulo : references
+	Proveedor ||--o{ Producto_Simple : references
+	Composicion_Prod.Compuesto }o--|| Producto_Compuesto : references
+	Componente ||--o{ Composicion_Prod.Compuesto : references
+	Pack ||--o{ Composicion_Pack : references
+	Producto ||--o{ Composicion_Pack : references
+	Color ||--o{ Componente : references
+	Color ||--o{ Producto_Simple : references
+
+	Componente {
+		INTEGER id
+		VARCHAR(255) nombre
+		TEXT descripcion
+		INTEGER id_proveedor
+		INTEGER id_color
+	}
+
+	Proveedor {
+		INTEGER id
+		VARCHAR(127) nombre
+		VARCHAR(31) telefono
+		VARCHAR(127) email
+		VARCHAR(255) direccion
+		BOOLEAN activo
+	}
+
+	Color {
+		INTEGER id
+		VARCHAR(31) nombre
+		VARCHAR(7) hex
+		VARCHAR(511) url_imagen
+		INTEGER id_familia
+	}
+
+	Familia {
+		INTEGER id
+		VARCHAR(127) nombre
+		TEXT descripcion
+	}
+
+	Articulo {
+		INTEGER id
+		VARCHAR(255) nombre
+		TEXT descripcion
+		VARCHAR(31) codigo_tienda
+		INTEGER id_familia
+		BOOLEAN activo
+		VARCHAR(255) tipo
+	}
+
+	Producto_Simple {
+		INTEGER id
+		INTEGER id_proveedor
+		INTEGER id_color
+	}
+
+	Producto_Compuesto {
+		INTEGER id
+	}
+
+	Composicion_Prod.Compuesto {
+		INTEGER id_producto_compuesto
+		INTEGER id_componente
+		INTEGER cantidad
+	}
+
+	Pack {
+		INTEGER id
+	}
+
+	Composicion_Pack {
+		INTEGER id_pack
+		INTEGER id_producto
+		INTEGER cantidad
+	}
+
+	Producto {
+		INTEGER id
+	}
+```
