@@ -11,7 +11,7 @@
 	- [Articulo](#articulo)
 	- [Producto_Simple](#producto_simple)
 	- [Producto_Compuesto](#producto_compuesto)
-	- [Composicion_Prod.Compuesto](#composicion_prod.compuesto)
+	- [Composicion_Prod.Compuesto](#composicion_prodcompuesto)
 	- [Pack](#pack)
 	- [Composicion_Pack](#composicion_pack)
 	- [Producto](#producto)

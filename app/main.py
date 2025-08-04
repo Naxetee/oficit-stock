@@ -1,0 +1,203 @@
+"""
+🚀 FastAPI Application - Sistema de Inventario Oficit
+
+Aplicación principal que coordina todos los endpoints del sistema de inventario.
+Organizada por modelos con rutas específicas para cada entidad.
+"""
+
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+import uvicorn
+import sys
+sys.path.insert(0, "./app/..")
+
+from fastapi import FastAPI, Depends
+from sqlalchemy.orm import Session
+from sqlalchemy import text
+from app.db import SessionLocal
+from fastapi.openapi.utils import get_openapi
+
+# Importar todos los routers de rutas
+# from app.routes import (
+#     familia_router,
+#     color_router,
+#     proveedor_router,
+#     articulo_router,
+#     componente_router,
+#     producto_router,
+#     pack_router,
+#     stock_router,
+#     inventario_router
+# )
+
+# Configuración de la aplicación
+app = FastAPI(
+    title="🏢 Oficit Stock Service",
+    description="""
+    ## Sistema de Inventario Completo
+
+    API RESTful para gestión integral de inventario con:
+    - 👥 Familias y Colores: Organización por categorías
+    - 🏢 Proveedores: Gestión de proveedores y contactos  
+    - 📦 Artículos: Catálogo base de productos
+    - 🔧 Componentes: Elementos para productos compuestos
+    - 🏷️ Productos: Simples y compuestos
+    - 📊 Stock: Control de inventario y movimientos
+    - 🎯 Coordinador: Operaciones complejas del inventario
+
+    ### Características:
+    - ✅ CRUD completo para todas las entidades
+    - ✅ Relaciones complejas entre modelos
+    - ✅ Validaciones de integridad
+    - ✅ Reportes y análisis avanzados
+    - ✅ Sistema de alertas de stock
+
+    ---
+    ## 🔒 Licencia y uso
+
+    > ⚠️ Este software es propiedad de Tienda Oficit SL. Queda prohibida su copia, distribución o uso fuera de la empresa sin autorización expresa.
+    """,
+    version="1.0.0",
+    contact={
+        "name": "Tienda Oficit SLU",
+    },
+    # Ocultar 422 globalmente
+    openapi_url="/openapi.json",
+    docs_url="/docs",
+    redoc_url="/redoc"
+)
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc):
+    return JSONResponse(
+        status_code=400,
+        content={"detail": "Datos inválidos en la petición"}
+    )
+
+# Personalizar la generación de OpenAPI para ocultar 422
+# def custom_openapi():
+#     if app.openapi_schema:
+#         return app.openapi_schema
+    
+#     openapi_schema = get_openapi(
+#         title=app.title,
+#         version=app.version,
+#         description=app.description,
+#         routes=app.routes,
+#     )
+    
+#     # Remover 422 de todas las rutas
+#     for path_data in openapi_schema["paths"].values():
+#         for operation in path_data.values():
+#             if "responses" in operation and "422" in operation["responses"]:
+#                 del operation["responses"]["422"]
+    
+#     app.openapi_schema = openapi_schema
+#     return app.openapi_schema
+
+# app.openapi = custom_openapi
+
+def get_db():
+    """
+    🔌 Dependencia para obtener sesión de base de datos
+    """
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+# ==========================================
+# ENDPOINT RAÍZ
+# ==========================================
+
+@app.get("/", tags=["Sistema"])
+def read_root():
+    """
+    🏠 Endpoint raíz - Estado del servicio
+    """
+    return {
+        "servicio": "Oficit Stock Service",
+        "version": "1.0.0",
+        "estado": "✅ Activo",
+        "mensaje": "Sistema de inventario funcionando correctamente",
+        "documentacion": "/docs",
+        "estado_del_sistema": "/health",
+        "endpoints_disponibles": {
+            "familias": "/familias",
+            "colores": "/colores", 
+            "proveedores": "/proveedores",
+            "articulos": "/articulos",
+            "componentes": "/componentes",
+            "productos": "/productos",
+            "packs": "/packs",
+            "stock": "/stock",
+            "inventario": "/inventario"
+        }
+    }
+
+@app.get("/health", tags=["Sistema"])
+def health_check(db: Session = Depends(get_db)):
+    """
+    🏥 Verificación de salud del sistema
+    """
+    try:
+        # Verificar conexión a base de datos
+        q = text('SELECT 1')  # SQL estándar para verificar conexión
+        db.execute(q)
+        return {
+            "estado": "✅ Saludable",
+            "base_datos": "✅ Conectada",
+            "timestamp": "2025-07-29T00:00:00Z"
+        }
+    except Exception as e:
+        return {
+            "estado": "❌ Error",
+            "base_datos": "❌ Desconectada",
+            "error": str(e),
+            "timestamp": "2025-07-29T00:00:00Z"
+        }
+
+# ==========================================
+# REGISTRO DE ROUTERS POR MODELO
+# ==========================================
+
+# Modelos base (sin dependencias fuertes)
+# app.include_router(familia_router)
+# app.include_router(color_router)
+# app.include_router(proveedor_router)
+
+# # Modelos intermedios (dependen de los base)
+# app.include_router(articulo_router)
+# app.include_router(componente_router)
+
+# # Modelos complejos (dependen de intermedios)  
+# app.include_router(producto_router)
+# app.include_router(pack_router)
+# app.include_router(stock_router)
+
+# # Servicio coordinador (operaciones complejas)
+# app.include_router(inventario_router)
+
+# ==========================================
+# CONFIGURACIÓN ADICIONAL
+# ==========================================
+
+# Middleware para CORS (si es necesario)
+# from fastapi.middleware.cors import CORSMiddleware
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"],
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
+
+if __name__ == "__main__":
+    uvicorn.run(
+        "app.main:app", 
+        host="localhost", 
+        port=8000, 
+        reload=True,
+        log_level="info"
+    )

@@ -13,7 +13,6 @@ param(
 )
 
 # Configuracion
-$ProjectName = "oficit-stock"
 $DockerComposeFile = "docker-compose.yml"
 $EnvFile = ".env"
 
@@ -56,7 +55,6 @@ function Test-DockerInstallation {
         Write-ColorOutput "[OK] Docker encontrado: $dockerVersion" "Success"
 
         # Verificar que Docker Desktop esta corriendo
-        $dockerInfo = docker info 2>$null
         if ($LASTEXITCODE -ne 0) {
             throw "Docker Desktop no esta corriendo"
         }
@@ -188,9 +186,6 @@ function Connect-Database {
     Write-ColorOutput " - Base de datos: $($envVars.POSTGRES_DB)" "Info"
     Write-ColorOutput " - Usuario: $($envVars.POSTGRES_USER)" "Info"
     Write-Host ""
-
-    # Crear string de conexion para diferentes herramientas
-    $connectionString = "postgresql://$($envVars.POSTGRES_USER):$($envVars.POSTGRES_PASSWORD)@$($envVars.POSTGRES_HOST):$($envVars.POSTGRES_PORT)/$($envVars.POSTGRES_DB)"
 
     # Opciones de conexion
     Write-ColorOutput "[INFO] Opciones para conectar:" "Info"
