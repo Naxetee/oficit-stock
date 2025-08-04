@@ -1,6 +1,7 @@
 from typing import Optional, List
-from sqlalchemy import Integer, String, Text, ForeignKeyConstraint, PrimaryKeyConstraint, UniqueConstraint
+from sqlalchemy import Integer, String, Text, ForeignKeyConstraint, PrimaryKeyConstraint, UniqueConstraint, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.sql import func
 from .base_model import Base
 
 class Color(Base):
@@ -16,6 +17,8 @@ class Color(Base):
     hex: Mapped[Optional[str]] = mapped_column(String(7))
     url_imagen: Mapped[Optional[str]] = mapped_column(String(511))
     id_familia: Mapped[Optional[int]] = mapped_column(Integer)
+    created_at: Mapped = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
 
     Familia_: Mapped[Optional['Familia']] = relationship('Familia', back_populates='Color')
     Componente: Mapped[List['Componente']] = relationship('Componente', back_populates='Color_')

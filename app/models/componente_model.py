@@ -1,6 +1,7 @@
 from typing import Optional, List
-from sqlalchemy import Integer, String, Text, ForeignKeyConstraint, PrimaryKeyConstraint, UniqueConstraint
+from sqlalchemy import Integer, String, Text, ForeignKeyConstraint, PrimaryKeyConstraint, UniqueConstraint, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.sql import func
 from .base_model import Base
 from models import *
 
@@ -18,6 +19,8 @@ class Componente(Base):
     descripcion: Mapped[Optional[str]] = mapped_column(Text)
     id_proveedor: Mapped[Optional[int]] = mapped_column(Integer)
     id_color: Mapped[Optional[int]] = mapped_column(Integer)
+    created_at: Mapped = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
 
     Color_: Mapped[Optional['Color']] = relationship('Color', back_populates='Componente')
     Proveedor_: Mapped[Optional['Proveedor']] = relationship('Proveedor', back_populates='Componente')
