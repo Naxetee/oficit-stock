@@ -1,11 +1,9 @@
-from typing import Optional
+from typing import List, Optional
 from sqlalchemy import Integer, String, Text, Boolean, CheckConstraint, ForeignKeyConstraint, PrimaryKeyConstraint, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 from .base_model import Base
 import datetime
-from .color_model import Color
-from .proveedor_model import Proveedor
 
 
 class ProductoSimple(Base):
@@ -31,3 +29,4 @@ class ProductoSimple(Base):
 
     Color_: Mapped[Optional['Color']] = relationship('Color', back_populates='Producto_Simple')
     Proveedor_: Mapped[Optional['Proveedor']] = relationship('Proveedor', back_populates='Producto_Simple')
+    Stock: Mapped[List['Stock']] = relationship('Stock', back_populates='Producto_Simple')

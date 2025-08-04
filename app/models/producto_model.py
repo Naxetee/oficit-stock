@@ -2,7 +2,6 @@ from typing import Optional, List
 from sqlalchemy import Integer, String, Text, Boolean, CheckConstraint, PrimaryKeyConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base_model import Base
-from .composicion_pack_model import ComposicionPack
 
 
 class Producto(Base):

@@ -4,7 +4,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 from .base_model import Base
 import datetime
-from .composicion_pack_model import ComposicionPack
 
 
 class Pack(Base):

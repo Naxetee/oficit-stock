@@ -4,8 +4,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 from .base_model import Base
 import datetime
-from .articulo_model import Articulo
-from .color_model import Color
 
 
 class Familia(Base):

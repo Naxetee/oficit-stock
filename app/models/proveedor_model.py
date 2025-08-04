@@ -4,8 +4,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 from .base_model import Base
 import datetime
-from .componente_model import Componente
-from .producto_simple_model import ProductoSimple
 
 
 class Proveedor(Base):

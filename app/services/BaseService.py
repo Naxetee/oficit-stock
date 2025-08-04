@@ -33,7 +33,7 @@ class BaseService:
         self.model = model
         self.response_schema = response_schema
 
-    def obtener_todos(self, filtros: Optional[Dict[str, Any]] = None) -> List[ResponseSchemaType]:
+    def obtener_todos(self, skip: int = 0, limit: int = 100, filtros: Optional[Dict[str, Any]] = None) -> List[ResponseSchemaType]:
         """
         Recupera todos los registros del modelo, aplicando filtros opcionales.
         Args:
@@ -45,9 +45,14 @@ class BaseService:
         if filtros:
             for attr, value in filtros.items():
                 if hasattr(self.model, attr) and value is not None:
-                    query = query.where(getattr(self.model, attr) == value)
-        result = self.db.execute(query).scalars().all()
-        return result
+                    column = getattr(self.model, attr)
+                    # Solo usar ilike para strings, comparación directa para otros tipos
+                    if isinstance(value, str):
+                        query = query.where(column.ilike(f"%{value}%"))
+                    else:
+                        query = query.where(column == value)
+        result = self.db.scalars(query.offset(skip).limit(limit))
+        return result.all()
 
     def obtener_por_id(self, id: Any) -> Optional[ResponseSchemaType]:
         """

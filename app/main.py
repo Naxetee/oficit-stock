@@ -15,13 +15,12 @@ from sqlalchemy import text
 from app.db import SessionLocal
 
 # Importar todos los routers de rutas
+from app.routes import articulo_router
 from app.routes.familia_router import router as familia_router
-from app.routes.pack_router import router as pack_router
 from app.routes.proveedor_router import router as proveedor_router
-from app.routes.producto_simple_router import router as producto_simple_router
-from app.routes.producto_compuesto_router import router as producto_compuesto_router
 from app.routes.color_router import router as color_router
 from app.routes.componente_router import router as componente_router
+from app.routes.articulo_router import router as articulo_router
 
 # Configuración de la aplicación
 app = FastAPI(
@@ -97,10 +96,8 @@ def read_root():
             "familias": "/familia",
             "colores": "/color",
             "proveedores": "/proveedor",
-            "productos_simples": "/producto-simple",
-            "productos_compuestos": "/producto-compuesto",
             "componentes": "/componente",
-            "packs": "/packs"
+            "articulos": "/articulos"
         }
     }
 
@@ -131,10 +128,8 @@ def health_check(db: Session = Depends(get_db)):
 # ==========================================
 
 app.include_router(familia_router)
-app.include_router(pack_router)
+app.include_router(articulo_router)
 app.include_router(proveedor_router)
-app.include_router(producto_simple_router)
-app.include_router(producto_compuesto_router)
 app.include_router(color_router)
 app.include_router(componente_router)
 

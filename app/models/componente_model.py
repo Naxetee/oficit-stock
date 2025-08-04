@@ -3,10 +3,8 @@ from sqlalchemy import Integer, String, Text, ForeignKeyConstraint, PrimaryKeyCo
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 from .base_model import Base
+from .stock_model import Stock
 import datetime
-from .color_model import Color
-from .proveedor_model import Proveedor
-from .composicion_prod_compuesto_model import ComposicionProdCompuesto
 
 class Componente(Base):
     __tablename__ = 'Componente'
@@ -28,3 +26,4 @@ class Componente(Base):
     Color_: Mapped[Optional['Color']] = relationship('Color', back_populates='Componente')
     Proveedor_: Mapped[Optional['Proveedor']] = relationship('Proveedor', back_populates='Componente')
     Composicion_Prod_Compuesto: Mapped[List['ComposicionProdCompuesto']] = relationship('ComposicionProdCompuesto', back_populates='Componente_')
+    Stock: Mapped[List['Stock']] = relationship('Stock', back_populates='Componente_')

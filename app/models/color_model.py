@@ -3,10 +3,6 @@ from sqlalchemy import Integer, String, Text, ForeignKeyConstraint, PrimaryKeyCo
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 from .base_model import Base
-from .familia_model import Familia
-from .componente_model import Componente
-from .producto_simple_model import ProductoSimple
-
 import datetime
 
 class Color(Base):
