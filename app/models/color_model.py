@@ -3,6 +3,10 @@ from sqlalchemy import Integer, String, Text, ForeignKeyConstraint, PrimaryKeyCo
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 from .base_model import Base
+from .familia_model import Familia
+from .componente_model import Componente
+from .producto_simple_model import ProductoSimple
+
 import datetime
 
 class Color(Base):
@@ -23,5 +27,4 @@ class Color(Base):
 
     Familia_: Mapped[Optional['Familia']] = relationship('Familia', back_populates='Color')
     Componente: Mapped[List['Componente']] = relationship('Componente', back_populates='Color_')
-    Producto_Simple: Mapped[List['ProductoSimple']] = relationship('ProductoSimple', back_populates='Color_')
     Producto_Simple: Mapped[List['ProductoSimple']] = relationship('ProductoSimple', back_populates='Color_')

@@ -2,6 +2,7 @@ from typing import Optional, List
 from sqlalchemy import Integer, String, Text, Boolean, CheckConstraint, PrimaryKeyConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base_model import Base
+from .composicion_pack_model import ComposicionPack
 
 
 class Producto(Base):
@@ -19,5 +20,4 @@ class Producto(Base):
     id_familia: Mapped[Optional[int]] = mapped_column(Integer)
     activo: Mapped[Optional[bool]] = mapped_column(Boolean)
 
-    Composicion_Pack: Mapped[List['ComposicionPack']] = relationship('ComposicionPack', back_populates='Producto_')
     Composicion_Pack: Mapped[List['ComposicionPack']] = relationship('ComposicionPack', back_populates='Producto_')

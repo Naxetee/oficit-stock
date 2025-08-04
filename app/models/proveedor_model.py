@@ -4,6 +4,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 from .base_model import Base
 import datetime
+from .componente_model import Componente
+from .producto_simple_model import ProductoSimple
 
 
 class Proveedor(Base):
@@ -23,5 +25,4 @@ class Proveedor(Base):
     updated_at: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
 
     Componente: Mapped[List['Componente']] = relationship('Componente', back_populates='Proveedor_')
-    Producto_Simple: Mapped[List['ProductoSimple']] = relationship('ProductoSimple', back_populates='Proveedor_')
     Producto_Simple: Mapped[List['ProductoSimple']] = relationship('ProductoSimple', back_populates='Proveedor_')
