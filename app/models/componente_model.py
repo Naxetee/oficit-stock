@@ -2,6 +2,7 @@ from typing import Optional, List
 from sqlalchemy import Integer, String, Text, ForeignKeyConstraint, PrimaryKeyConstraint, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base_model import Base
+from models import *
 
 class Componente(Base):
     __tablename__ = 'Componente'

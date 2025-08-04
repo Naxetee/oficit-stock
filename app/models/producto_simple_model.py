@@ -2,6 +2,8 @@ from typing import Optional
 from sqlalchemy import Integer, String, Text, Boolean, CheckConstraint, ForeignKeyConstraint, PrimaryKeyConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base_model import Base
+from models import *
+
 
 class ProductoSimple(Base):
     __tablename__ = 'Producto_Simple'

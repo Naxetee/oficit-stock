@@ -2,6 +2,8 @@ from typing import List, Optional
 from sqlalchemy import Integer, String, Text, PrimaryKeyConstraint, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base_model import Base
+from models import *
+
 
 class Familia(Base):
     __tablename__ = 'Familia'

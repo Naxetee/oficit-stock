@@ -2,6 +2,8 @@ from typing import Optional, List
 from sqlalchemy import Integer, String, Boolean, PrimaryKeyConstraint, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base_model import Base
+from models import *
+
 
 class Proveedor(Base):
     __tablename__ = 'Proveedor'

@@ -1,6 +1,8 @@
 from sqlalchemy import Integer, PrimaryKeyConstraint, UniqueConstraint, ForeignKeyConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base_model import Base
+from models import *
+
 
 class ComposicionPack(Base):
     __tablename__ = 'Composicion_Pack'
