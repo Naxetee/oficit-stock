@@ -3,7 +3,6 @@ from sqlalchemy import Integer, String, Text, PrimaryKeyConstraint, UniqueConstr
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 from .base_model import Base
-from models import *
 import datetime
 
 

@@ -8,27 +8,20 @@ Organizada por modelos con rutas específicas para cada entidad.
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 import uvicorn
-import sys
-sys.path.insert(0, "./app/..")
 
 from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from app.db import SessionLocal
-from fastapi.openapi.utils import get_openapi
 
 # Importar todos los routers de rutas
-# from app.routes import (
-#     familia_router,
-#     color_router,
-#     proveedor_router,
-#     articulo_router,
-#     componente_router,
-#     producto_router,
-#     pack_router,
-#     stock_router,
-#     inventario_router
-# )
+from app.routes.familia_router import router as familia_router
+from app.routes.pack_router import router as pack_router
+from app.routes.proveedor_router import router as proveedor_router
+from app.routes.producto_simple_router import router as producto_simple_router
+from app.routes.producto_compuesto_router import router as producto_compuesto_router
+from app.routes.color_router import router as color_router
+from app.routes.componente_router import router as componente_router
 
 # Configuración de la aplicación
 app = FastAPI(
@@ -74,29 +67,6 @@ async def validation_exception_handler(request, exc):
         content={"detail": "Datos inválidos en la petición"}
     )
 
-# Personalizar la generación de OpenAPI para ocultar 422
-# def custom_openapi():
-#     if app.openapi_schema:
-#         return app.openapi_schema
-    
-#     openapi_schema = get_openapi(
-#         title=app.title,
-#         version=app.version,
-#         description=app.description,
-#         routes=app.routes,
-#     )
-    
-#     # Remover 422 de todas las rutas
-#     for path_data in openapi_schema["paths"].values():
-#         for operation in path_data.values():
-#             if "responses" in operation and "422" in operation["responses"]:
-#                 del operation["responses"]["422"]
-    
-#     app.openapi_schema = openapi_schema
-#     return app.openapi_schema
-
-# app.openapi = custom_openapi
-
 def get_db():
     """
     🔌 Dependencia para obtener sesión de base de datos
@@ -121,18 +91,16 @@ def read_root():
         "version": "1.0.0",
         "estado": "✅ Activo",
         "mensaje": "Sistema de inventario funcionando correctamente",
-        "documentacion": "/docs",
+        "documentacion": app.docs_url,
         "estado_del_sistema": "/health",
         "endpoints_disponibles": {
-            "familias": "/familias",
-            "colores": "/colores", 
-            "proveedores": "/proveedores",
-            "articulos": "/articulos",
-            "componentes": "/componentes",
-            "productos": "/productos",
-            "packs": "/packs",
-            "stock": "/stock",
-            "inventario": "/inventario"
+            "familias": "/familia",
+            "colores": "/color",
+            "proveedores": "/proveedor",
+            "productos_simples": "/producto-simple",
+            "productos_compuestos": "/producto-compuesto",
+            "componentes": "/componente",
+            "packs": "/packs"
         }
     }
 
@@ -162,22 +130,13 @@ def health_check(db: Session = Depends(get_db)):
 # REGISTRO DE ROUTERS POR MODELO
 # ==========================================
 
-# Modelos base (sin dependencias fuertes)
-# app.include_router(familia_router)
-# app.include_router(color_router)
-# app.include_router(proveedor_router)
-
-# # Modelos intermedios (dependen de los base)
-# app.include_router(articulo_router)
-# app.include_router(componente_router)
-
-# # Modelos complejos (dependen de intermedios)  
-# app.include_router(producto_router)
-# app.include_router(pack_router)
-# app.include_router(stock_router)
-
-# # Servicio coordinador (operaciones complejas)
-# app.include_router(inventario_router)
+app.include_router(familia_router)
+app.include_router(pack_router)
+app.include_router(proveedor_router)
+app.include_router(producto_simple_router)
+app.include_router(producto_compuesto_router)
+app.include_router(color_router)
+app.include_router(componente_router)
 
 # ==========================================
 # CONFIGURACIÓN ADICIONAL
@@ -201,3 +160,7 @@ if __name__ == "__main__":
         reload=True,
         log_level="info"
     )
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )

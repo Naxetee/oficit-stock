@@ -3,7 +3,7 @@ from sqlalchemy import Integer, String, Boolean, PrimaryKeyConstraint, UniqueCon
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 from .base_model import Base
-from models import *
+import datetime
 
 
 class Proveedor(Base):
@@ -19,8 +19,9 @@ class Proveedor(Base):
     email: Mapped[Optional[str]] = mapped_column(String(127))
     direccion: Mapped[Optional[str]] = mapped_column(String(255))
     activo: Mapped[Optional[bool]] = mapped_column(Boolean)
-    created_at: Mapped = mapped_column(DateTime, server_default=func.now())
-    updated_at: Mapped = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
 
     Componente: Mapped[List['Componente']] = relationship('Componente', back_populates='Proveedor_')
+    Producto_Simple: Mapped[List['ProductoSimple']] = relationship('ProductoSimple', back_populates='Proveedor_')
     Producto_Simple: Mapped[List['ProductoSimple']] = relationship('ProductoSimple', back_populates='Proveedor_')

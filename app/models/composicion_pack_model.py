@@ -1,7 +1,6 @@
 from sqlalchemy import Integer, PrimaryKeyConstraint, UniqueConstraint, ForeignKeyConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base_model import Base
-from models import *
 
 
 class ComposicionPack(Base):
@@ -18,4 +17,5 @@ class ComposicionPack(Base):
     cantidad: Mapped[int] = mapped_column(Integer)
 
     Pack_: Mapped['Pack'] = relationship('Pack', back_populates='Composicion_Pack')
+    Producto_: Mapped['Producto'] = relationship('Producto', back_populates='Composicion_Pack')
     Producto_: Mapped['Producto'] = relationship('Producto', back_populates='Composicion_Pack')
