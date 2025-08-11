@@ -1,5 +1,4 @@
-from ast import List
-from app.schemas.stock_schema import StockResponse
+from typing import List
 from .BaseService import BaseService
 from ..models.componente_model import Componente
 from ..models.stock_model import Stock
@@ -9,7 +8,7 @@ class ComponenteService(BaseService):
     def __init__(self, db):
         super().__init__(db, Componente, ComponenteResponse)
 
-    def obtener_stock(self, id: int = None) -> List[StockResponse]:
+    def obtener_stock(self, id: int = None) -> List[ComponenteResponse]:
         """
             Obtiene los stocks de todos los componentes.
             Args:

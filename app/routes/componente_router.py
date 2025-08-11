@@ -1,4 +1,6 @@
+from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.params import Query
 from sqlalchemy.orm import Session
 from ..schemas.componente_schema import ComponenteResponse, ComponenteCreate, ComponenteUpdate
 from ..services import get_ComponenteService
@@ -6,13 +8,28 @@ from ..db import get_db
 
 router = APIRouter(prefix="/componente", tags=["Componente"])
 
-@router.get("/", response_model=list[ComponenteResponse], responses={
+@router.get("/", response_model=List[ComponenteResponse], responses={
     200: {"description": "Lista de componentes"},
     422: {"description": "Error de validación"}
 })
-def get_all(db: Session = Depends(get_db)):
+def get_all(
+    db: Session = Depends(get_db),
+    skip: int = Query(0, ge=0, description="Número de registros a saltar"),
+    limit: int = Query(100, ge=1, le=1000, description="Número máximo de registros"),
+    color_id: Optional[int] = Query(None, description="Filtrar por color"),
+    proveedor_id: Optional[int] = Query(None, description="Filtrar por proveedor"),
+    nombre: Optional[str] = Query(None, description="Buscar por nombre (búsqueda parcial)")
+):
     service = get_ComponenteService()(db)
-    return service.obtener_todos()
+    return service.obtener_todos(
+        skip=skip,
+        limit=limit,
+        filtros={
+            "id_color": color_id,
+            "id_proveedor": proveedor_id,
+            "nombre": nombre
+        }
+        )
 
 @router.get("/{id}", response_model=ComponenteResponse, responses={
     200: {"description": "Componente encontrado"},

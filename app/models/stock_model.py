@@ -1,7 +1,6 @@
 from typing import Optional
-from sqlalchemy import CheckConstraint, Integer, String, ForeignKeyConstraint, PrimaryKeyConstraint, DateTime, text
+from sqlalchemy import CheckConstraint, Integer, String, ForeignKeyConstraint, PrimaryKeyConstraint, DateTime, text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.sql import func
 from .base_model import Base
 import datetime
 

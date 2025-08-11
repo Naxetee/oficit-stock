@@ -157,10 +157,16 @@ CREATE TABLE "Movimiento" (
 	"tipo" VARCHAR(31) NOT NULL CHECK(tipo IN ('entrada', 'salida')),
 	"cantidad" INTEGER NOT NULL,
 	"descripcion" TEXT,
-	"id_stock" INTEGER NOT NULL,
+	"id_producto_simple" INTEGER,
+	"id_componente" INTEGER,
 	"created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	"updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	PRIMARY KEY("id")
+	PRIMARY KEY("id"),
+	CHECK (
+		(id_producto_simple IS NOT NULL AND id_componente IS NULL)
+		OR
+		(id_componente IS NOT NULL AND id_producto_simple IS NULL)
+	)
 );
 
 ALTER TABLE "Componente"
@@ -200,8 +206,11 @@ ALTER TABLE "Stock"
 ADD FOREIGN KEY("id_componente") REFERENCES "Componente"("id")
 ON UPDATE CASCADE ON DELETE RESTRICT;
 ALTER TABLE "Movimiento"
-ADD FOREIGN KEY("id_stock") REFERENCES "Stock"("id")
-ON UPDATE CASCADE ON DELETE RESTRICT;
+ADD FOREIGN KEY("id_producto_simple") REFERENCES "Producto_Simple"("id")
+ON UPDATE CASCADE ON DELETE NO ACTION;
+ALTER TABLE "Movimiento"
+ADD FOREIGN KEY("id_componente") REFERENCES "Componente"("id")
+ON UPDATE CASCADE ON DELETE NO ACTION;
 
 
 
@@ -209,24 +218,34 @@ ON UPDATE CASCADE ON DELETE RESTRICT;
 CREATE OR REPLACE FUNCTION actualizar_stock_movimiento()
 RETURNS TRIGGER AS $$
 DECLARE
-    cantidad_actual INTEGER;
+	cantidad_actual INTEGER;
+	stock_id INTEGER;
 BEGIN
-    IF NEW.tipo = 'salida' THEN
-        SELECT cantidad INTO cantidad_actual FROM "Stock" WHERE id = NEW.id_stock;
-        IF cantidad_actual < NEW.cantidad THEN
-            RAISE EXCEPTION 'No hay suficiente stock del producto % para la salida. Stock actual: %, solicitado: %', NEW.id_stock, cantidad_actual, NEW.cantidad;
-        END IF;
-        UPDATE "Stock"
-        SET cantidad = cantidad_actual - NEW.cantidad,
-            updated_at = CURRENT_TIMESTAMP
-        WHERE id = NEW.id_stock;
-    ELSIF NEW.tipo = 'entrada' THEN
-        UPDATE "Stock"
-        SET cantidad = cantidad + NEW.cantidad,
-            updated_at = CURRENT_TIMESTAMP
-        WHERE id = NEW.id_stock;
-    END IF;
-    RETURN NEW;
+	IF NEW.id_producto_simple IS NOT NULL THEN
+		SELECT id, cantidad INTO stock_id, cantidad_actual FROM "Stock"
+		WHERE id_producto_simple = NEW.id_producto_simple AND id_componente IS NULL;
+	ELSIF NEW.id_componente IS NOT NULL THEN
+		SELECT id, cantidad INTO stock_id, cantidad_actual FROM "Stock"
+		WHERE id_componente = NEW.id_componente AND id_producto_simple IS NULL;
+	ELSE
+		RAISE EXCEPTION 'Debe especificar id_producto_simple o id_componente en el movimiento.';
+	END IF;
+
+	IF NEW.tipo = 'salida' THEN
+		IF cantidad_actual < NEW.cantidad THEN
+			RAISE EXCEPTION 'No hay suficiente stock (id: %) para la salida. Stock actual: %, solicitado: %', stock_id, cantidad_actual, NEW.cantidad;
+		END IF;
+		UPDATE "Stock"
+		SET cantidad = cantidad_actual - NEW.cantidad,
+			updated_at = CURRENT_TIMESTAMP
+		WHERE id = stock_id;
+	ELSIF NEW.tipo = 'entrada' THEN
+		UPDATE "Stock"
+		SET cantidad = cantidad + NEW.cantidad,
+			updated_at = CURRENT_TIMESTAMP
+		WHERE id = stock_id;
+	END IF;
+	RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -234,6 +253,46 @@ CREATE TRIGGER trigger_actualizar_stock_movimiento
 BEFORE INSERT ON "Movimiento"
 FOR EACH ROW
 EXECUTE FUNCTION actualizar_stock_movimiento();
+
+-- Funcion y trigger para deshacer movimientos
+CREATE OR REPLACE FUNCTION deshacer_movimiento()
+RETURNS TRIGGER AS $$
+DECLARE
+	stock_id INTEGER;
+	cantidad_actual INTEGER;
+BEGIN
+	IF OLD.id_producto_simple IS NOT NULL THEN
+		SELECT id, cantidad INTO stock_id, cantidad_actual FROM "Stock"
+		WHERE id_producto_simple = OLD.id_producto_simple AND id_componente IS NULL;
+	ELSIF OLD.id_componente IS NOT NULL THEN
+		SELECT id, cantidad INTO stock_id, cantidad_actual FROM "Stock"
+		WHERE id_componente = OLD.id_componente AND id_producto_simple IS NULL;
+	ELSE
+		RAISE EXCEPTION 'Debe especificar id_producto_simple o id_componente en el movimiento.';
+	END IF;
+	IF OLD.tipo = 'salida' THEN
+		UPDATE "Stock"
+		SET cantidad = cantidad_actual + OLD.cantidad,
+			updated_at = CURRENT_TIMESTAMP
+		WHERE id = stock_id;
+	ELSIF OLD.tipo = 'entrada' THEN
+		IF cantidad_actual < OLD.cantidad THEN
+			RAISE EXCEPTION 'No hay suficiente stock (id: %) para deshacer la entrada de stock.', stock_id;
+		END IF;
+		UPDATE "Stock"
+		SET cantidad = cantidad_actual - OLD.cantidad,
+			updated_at = CURRENT_TIMESTAMP
+		WHERE id = stock_id;
+	END IF;
+	RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_deshacer_movimiento
+AFTER DELETE ON "Movimiento"
+FOR EACH ROW
+EXECUTE FUNCTION deshacer_movimiento();
+		
 
 -- Función y trigger para Pack
 CREATE OR REPLACE FUNCTION before_insert_pack()

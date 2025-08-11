@@ -2,7 +2,7 @@ from typing import Dict, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
-from app.schemas.articulo_schema import ArticuloResponse
+from app.schemas.articulo_schema import ArticuloCreate, ArticuloResponse, ArticuloUpdate
 from ..services import get_ProductoCompuestoService, get_ProductoSimpleService, get_PackService
 from ..db import get_db
 
@@ -64,3 +64,67 @@ def obtener_articulo_por_id(id: int, db: Session = Depends(get_db)):
             return articulo
 
     raise HTTPException(status_code=404, detail="Artículo no encontrado")
+
+@router.post("/", response_model=ArticuloResponse, responses={
+    201: {"description": "Artículo creado"},
+    422: {"description": "Error de validación"}
+})
+def crear_articulo(data: ArticuloCreate, db: Session = Depends(get_db)):
+    """
+    Crea un nuevo artículo en la base de datos.
+    """
+    if data.tipo == "compuesto":
+        service = get_ProductoCompuestoService()(db)
+    elif data.tipo == "simple":
+        service = get_ProductoSimpleService()(db)
+    elif data.tipo == "pack":
+        service = get_PackService()(db)
+    else:
+        raise HTTPException(status_code=400, detail="Tipo de artículo no válido")
+
+    return service.crear(data)
+
+@router.put("/{id}", response_model=ArticuloResponse, responses={
+    200: {"description": "Artículo actualizado"},
+    404: {"description": "Artículo no encontrado"},
+    422: {"description": "Error de validación"}
+})
+def actualizar_articulo(id: int, data: ArticuloUpdate, db: Session = Depends(get_db)):
+    """
+    Actualiza un artículo existente por su ID.
+    """
+    if data.tipo == "compuesto":
+        service = get_ProductoCompuestoService()(db)
+    elif data.tipo == "simple":
+        service = get_ProductoSimpleService()(db)
+    elif data.tipo == "pack":
+        service = get_PackService()(db)
+    else:
+        raise HTTPException(status_code=400, detail="Tipo de artículo no válido")
+
+    result = service.actualizar(id, data)
+    if not result:
+        raise HTTPException(status_code=404, detail="Artículo no encontrado")
+    
+    return result
+
+@router.delete("/{id}", responses={
+    200: {"description": "Artículo eliminado"},
+    404: {"description": "Artículo no encontrado"},
+    422: {"description": "Error de validación"}
+})
+def eliminar_articulo(id: int, db: Session = Depends(get_db)):
+    """
+    Elimina un artículo por su ID.
+    """
+    articulo = obtener_articulo_por_id(id, db)
+    if articulo.tipo == "compuesto":
+        service = get_ProductoCompuestoService()(db)
+    elif articulo.tipo == "simple":
+        service = get_ProductoSimpleService()(db)
+    elif articulo.tipo == "pack":
+        service = get_PackService()(db)
+    else:
+        raise HTTPException(status_code=400, detail="Tipo de artículo no válido")
+    result = service.eliminar(id)
+    return {"detail": "Artículo eliminado correctamente"}

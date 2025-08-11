@@ -6,7 +6,7 @@ class StockBase(BaseModel):
     cantidad: int = Field(..., ge=0)
     cantidad_minima: int = Field(..., ge=0)
     ubicacion: Optional[str] = Field(None, max_length=255)
-    tipo: str = Field(..., max_length=31, regex='^(producto_simple|componente)$')
+    tipo: str = Field(..., max_length=31, pattern='^(producto_simple|componente)$')
     id_componente: Optional[int] = Field(None, ge=1)
     id_producto_simple: Optional[int] = Field(None, ge=1)
     
@@ -17,7 +17,7 @@ class StockUpdate(StockBase):
     cantidad: Optional[int] = Field(None, ge=0)
     cantidad_minima: Optional[int] = Field(None, ge=0)
     ubicacion: Optional[str] = Field(None, max_length=255)
-    tipo: Optional[str] = Field(None, max_length=31, regex='^(producto_simple|componente)$')
+    tipo: Optional[str] = Field(None, max_length=31, pattern='^(producto_simple|componente)$')
     id_componente: Optional[int] = Field(None, ge=1)
     id_producto_simple: Optional[int] = Field(None, ge=1)
 

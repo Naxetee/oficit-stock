@@ -15,7 +15,8 @@ from sqlalchemy import text
 from app.db import SessionLocal
 
 # Importar todos los routers de rutas
-from app.routes import articulo_router
+from app.routes.articulo_router import router as articulo_router
+from app.routes.stock_router import router as stock_router
 from app.routes.familia_router import router as familia_router
 from app.routes.proveedor_router import router as proveedor_router
 from app.routes.color_router import router as color_router
@@ -132,6 +133,7 @@ app.include_router(articulo_router)
 app.include_router(proveedor_router)
 app.include_router(color_router)
 app.include_router(componente_router)
+app.include_router(stock_router)
 
 # ==========================================
 # CONFIGURACIÓN ADICIONAL

@@ -70,37 +70,37 @@ INSERT INTO "Componente" ("nombre", "descripcion", "id_proveedor", "id_color", "
 ('Comp B', 'Desc Comp B', 2, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('Comp C', 'Desc Comp C', 3, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
--- -- Composicion_Prod_Compuesto (referencia a Producto_Compuesto y Componente)
--- INSERT INTO "Composicion_Prod_Compuesto" ("id_producto_compuesto", "id_componente", "cantidad") VALUES
--- (1, 1, 10),
--- (2, 2, 20),
--- (3, 3, 30);
+-- Composicion_Prod_Compuesto (referencia a Producto_Compuesto y Componente)
+INSERT INTO "Composicion_Prod_Compuesto" ("id_producto_compuesto", "id_componente", "cantidad") VALUES
+(7, 1, 10),
+(8, 2, 20),
+(9, 3, 30);
 
--- -- Composicion_Pack (referencia a Pack y Producto)
--- INSERT INTO "Composicion_Pack" ("id_pack", "id_producto", "cantidad") VALUES
--- (1, 1, 5),
--- (2, 2, 10),
--- (3, 3, 15);
+-- Composicion_Pack (referencia a Pack y Producto)
+INSERT INTO "Composicion_Pack" ("id_pack", "id_producto", "cantidad") VALUES
+(1, 4, 5),
+(2, 6, 10),
+(3, 8, 15);
 
--- -- Insertar datos en Stock (con tipo, id_componente e id_producto_simple)
--- INSERT INTO "Stock" (
---     "cantidad", "cantidad_minima", "ubicacion", "tipo", "id_componente", "id_producto_simple", "created_at", "updated_at"
--- ) VALUES
--- (100, 10, 'Almacen A', 'producto_simple', NULL, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
--- (50, 5, 'Almacen B', 'componente', 1, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
--- (200, 20, 'Almacen C', 'producto_simple', NULL, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
--- (30, 3, 'Almacen D', 'componente', 2, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
--- (150, 15, 'Almacen E', 'producto_simple', NULL, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
--- (25, 2, 'Almacen F', 'componente', 3, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+-- Insertar datos en Stock (con tipo, id_componente e id_producto_simple)
+INSERT INTO "Stock" (
+    "cantidad", "cantidad_minima", "ubicacion", "tipo", "id_componente", "id_producto_simple", "created_at", "updated_at"
+) VALUES
+(2, 20, 'Almacen A', 'producto_simple', NULL, 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(50, 5, 'Almacen B', 'componente', 1, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(200, 20, 'Almacen C', 'producto_simple', NULL, 5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(25, 30, 'Almacen D', 'componente', 2, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(150, 15, 'Almacen E', 'producto_simple', NULL, 6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(17, 20, 'Almacen F', 'componente', 3, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
--- -- Insertar datos en Movimiento (con id_stock)
+-- -- Insertar datos en Movimiento (con id_articulo)
 -- INSERT INTO "Movimiento" (
---     "id_stock", "tipo", "cantidad", "descripcion", "created_at", "updated_at"
+--     "id_producto_simple", "id_componente" , "tipo", "cantidad", "descripcion", "created_at", "updated_at"
 -- ) VALUES
--- (1, 'entrada', 50, 'Entrada de stock para PS1', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
--- (2, 'salida', 20, 'Salida de stock para Componente A', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
--- (3, 'entrada', 30, 'Entrada de stock para PS2', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
--- (4, 'salida', 10, 'Salida de stock para Componente B', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
--- (5, 'entrada', 70, 'Entrada de stock para PS3', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
--- (6, 'salida', 15, 'Salida de stock para Componente C', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+-- (4, NULL, 'entrada', 10, 'Entrada de stock PS1', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+-- (5, NULL, 'salida', 5, 'Salida de stock PS2', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+-- (6, NULL, 'entrada', 20, 'Entrada de stock PS3', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+-- (NULL, 1, 'entrada', 15, 'Entrada de stock Comp A', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+-- (NULL, 2, 'salida', 10, 'Salida de stock Comp B', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+-- (NULL, 3, 'entrada', 25, 'Entrada de stock Comp C', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 

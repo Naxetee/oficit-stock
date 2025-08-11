@@ -25,3 +25,11 @@ def get_ColorService():
 def get_ComponenteService():
     from .componente_service import ComponenteService
     return ComponenteService
+
+def get_StockService():
+    from .stock_service import StockService
+    return StockService
+
+def get_MovimientoService():
+    from .movimiento_service import MovimientoService
+    return MovimientoService
