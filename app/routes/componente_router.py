@@ -71,3 +71,15 @@ def update(id: int, data: ComponenteUpdate, db: Session = Depends(get_db)):
 def delete(id: int, db: Session = Depends(get_db)):
     service = get_ComponenteService()(db)
     return service.eliminar(id)
+
+@router.get("/compuesto/{id}", response_model=List[ComponenteResponse], responses={
+    200: {"description": "Lista de componentes del producto compuesto"},
+    404: {"description": "Producto compuesto no encontrado"},
+    422: {"description": "Error de validación"}
+})
+def get_componente_by_producto_compuesto(id: int, db: Session = Depends(get_db)):
+    service = get_ComponenteService()(db)
+    result = service.obtener_componentes_por_producto_compuesto(id)
+    if not result:
+        raise HTTPException(status_code=404, detail="Producto compuesto no encontrado")
+    return result

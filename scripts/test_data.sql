@@ -1,16 +1,16 @@
 DELETE FROM "Composicion_Pack";
 DELETE FROM "Composicion_Prod_Compuesto";
+DELETE FROM "Stock";
+DELETE FROM "Movimiento";
 DELETE FROM "Componente";
-DELETE FROM "Producto_Compuesto";
-DELETE FROM "Producto_Simple";
-DELETE FROM "Producto";
 DELETE FROM "Pack";
+DELETE FROM "Producto_Simple";
+DELETE FROM "Producto_Compuesto";
+DELETE FROM "Producto";
 DELETE FROM "Articulo";
 DELETE FROM "Proveedor";
 DELETE FROM "Color";
 DELETE FROM "Familia";
-DELETE FROM "Stock";
-DELETE FROM "Movimiento";
 
 -- Resetear las secuencias (PostgreSQL)
 ALTER SEQUENCE IF EXISTS "Componente_id_seq" RESTART WITH 1;
@@ -72,9 +72,11 @@ INSERT INTO "Componente" ("nombre", "descripcion", "id_proveedor", "id_color", "
 
 -- Composicion_Prod_Compuesto (referencia a Producto_Compuesto y Componente)
 INSERT INTO "Composicion_Prod_Compuesto" ("id_producto_compuesto", "id_componente", "cantidad") VALUES
-(7, 1, 10),
-(8, 2, 20),
-(9, 3, 30);
+(7, 1, 3),
+(7, 2, 1),
+(8, 2, 5),
+(9, 3, 2),
+(9, 1, 1);
 
 -- Composicion_Pack (referencia a Pack y Producto)
 INSERT INTO "Composicion_Pack" ("id_pack", "id_producto", "cantidad") VALUES

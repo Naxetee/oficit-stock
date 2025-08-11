@@ -21,3 +21,23 @@ class ComponenteService(BaseService):
         else:
             stocks = self.db.query(Stock).filter(Stock.tipo == 'componente')
         return stocks.all()
+
+    def obtener_componentes_por_producto_compuesto(self, id_producto_compuesto: int) -> List[ComponenteResponse]:
+        """
+            Obtiene los componentes asociados a un producto compuesto.
+            Args:
+                id_producto_compuesto (int): ID del producto compuesto.
+            Returns:
+                List[ComponenteResponse]: Lista de componentes asociados al producto compuesto.
+        """
+        from ..models.composicion_prod_compuesto_model import ComposicionProdCompuesto
+        from sqlalchemy.orm import joinedload
+
+        query = self.db.query(Componente).join(
+            ComposicionProdCompuesto,
+            Componente.id == ComposicionProdCompuesto.id_componente
+        ).filter(
+            ComposicionProdCompuesto.id_producto_compuesto == id_producto_compuesto
+        ).options(joinedload(Componente.Composicion_Prod_Compuesto))
+
+        return query.all()
