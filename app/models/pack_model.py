@@ -24,3 +24,6 @@ class Pack(Base):
     updated_at: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
 
     Composicion_Pack: Mapped['ComposicionPack'] = relationship('ComposicionPack', uselist=False, back_populates='Pack_')
+
+    def __repr__(self):
+        return f"({self.id}) {self.nombre}"

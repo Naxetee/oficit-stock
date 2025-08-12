@@ -1,6 +1,6 @@
 from typing import Optional, List
-from sqlalchemy import Integer, String, Text, Boolean, CheckConstraint, PrimaryKeyConstraint
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import Integer, String, Text, Boolean, CheckConstraint, PrimaryKeyConstraint, Column
+from sqlalchemy.orm import Mapped, mapped_column, relationship, declared_attr
 from .base_model import Base
 
 
@@ -18,5 +18,13 @@ class Producto(Base):
     codigo_tienda: Mapped[Optional[str]] = mapped_column(String(31))
     id_familia: Mapped[Optional[int]] = mapped_column(Integer)
     activo: Mapped[Optional[bool]] = mapped_column(Boolean)
+    __mapper_args__ = {
+        "polymorphic_on": tipo,
+        "polymorphic_identity": "producto",
+        "with_polymorphic": "*"
+    }
 
     Composicion_Pack: Mapped[List['ComposicionPack']] = relationship('ComposicionPack', back_populates='Producto_')
+
+    def __repr__(self):
+        return f"({self.id}) {self.nombre}"

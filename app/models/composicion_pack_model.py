@@ -17,3 +17,6 @@ class ComposicionPack(Base):
 
     Pack_: Mapped['Pack'] = relationship('Pack', back_populates='Composicion_Pack')
     Producto_: Mapped['Producto'] = relationship('Producto', back_populates='Composicion_Pack')
+
+    def __repr__(self):
+        return f"({self.id_pack}) {self.id_producto} - Cantidad: {self.cantidad}"

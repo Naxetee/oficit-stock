@@ -19,4 +19,4 @@ class ComposicionProdCompuesto(Base):
     Producto_Compuesto: Mapped['ProductoCompuesto'] = relationship('ProductoCompuesto', back_populates='Composicion_Prod_Compuesto')
 
     def __repr__(self):
-        return f"({self.id}) {self.id_producto_compuesto}-{self.id_componente}"
+        return f"{self.id_producto_compuesto}-{self.id_componente}"

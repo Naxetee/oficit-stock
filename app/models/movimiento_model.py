@@ -31,3 +31,9 @@ class Movimiento(Base):
     descripcion: Mapped[Optional[str]] = mapped_column(Text)
     created_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
+
+    def __repr__(self):
+        if self.id_producto_simple is not None:
+            return f"({self.id}) {self.tipo} - Cantidad: {self.cantidad} - Producto Simple ID: {self.id_producto_simple}"
+        else:
+            return f"({self.id}) {self.tipo} - Cantidad: {self.cantidad} - Componente ID: {self.id_componente}"
