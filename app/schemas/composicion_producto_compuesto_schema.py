@@ -6,7 +6,7 @@ class ComposicionProdCompuesto(BaseModel):
     cantidad: int = Field(..., gt=0, description="Cantidad del componente en el producto compuesto")
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class ComposicionProdCompuestoCreate(BaseModel):
     id_producto_compuesto: int = Field(..., description="ID del producto compuesto")
@@ -14,4 +14,4 @@ class ComposicionProdCompuestoCreate(BaseModel):
     cantidad: int = Field(..., gt=0, description="Cantidad del componente en el producto compuesto")
 
     class Config:
-        orm_mode = True
+        from_attributes = True

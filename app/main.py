@@ -6,14 +6,23 @@ Organizada por modelos con rutas específicas para cada entidad.
 """
 
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 import uvicorn
+from dotenv import load_dotenv
+import os
 
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Request, Form
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from app.db import SessionLocal, engine
 from sqladmin import Admin
+from fastapi.staticfiles import StaticFiles
+from starlette.middleware.authentication import AuthenticationMiddleware
+from starlette.authentication import (
+    AuthenticationBackend, AuthCredentials, SimpleUser, UnauthenticatedUser
+)
+from starlette.requests import HTTPConnection
+from starlette.middleware.sessions import SessionMiddleware
 
 # Importar todos los routers de rutas
 from app.routes.articulo_router import router as articulo_router
@@ -22,6 +31,7 @@ from app.routes.familia_router import router as familia_router
 from app.routes.proveedor_router import router as proveedor_router
 from app.routes.color_router import router as color_router
 from app.routes.componente_router import router as componente_router
+from app.admin.sqladmin_setup import CustomAdmin, register_admin_views
 
 # Configuración de la aplicación
 app = FastAPI(
@@ -62,13 +72,74 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
+# Añade soporte de sesiones
+app.add_middleware(SessionMiddleware, secret_key="oficit-secret-key")
+
+# ==========================================
+# AUTENTICACIÓN PARA ADMIN
+# ==========================================
+from sqladmin.authentication import AuthenticationBackend
+
+load_dotenv()
+ADMIN_USER = os.getenv("ADMIN_USER")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
+
+class OficitAuthBackend(AuthenticationBackend):
+    def __init__(self, secret_key: str):
+        super().__init__(secret_key=secret_key)
+
+    async def authenticate(self, request):
+        user = request.session.get("user")
+        if user:
+            return user
+        return None
+
+    async def login(self, request):
+        if request.method == "GET":
+            error = request.query_params.get("error")
+            return HTMLResponse(f"""
+            <html>
+                <head>
+                    <title>Login Oficit</title>
+                    <link rel="stylesheet" href="/static/custom.css">
+                </head>
+                <body style="background:#f5f6fa;">
+                    <div style="max-width:400px;margin:80px auto;padding:2em;background:white;border-radius:8px;box-shadow:0 2px 8px #0001;">
+                        <h2>Iniciar sesión</h2>
+                        {f'<div style="color:red;">{error}</div>' if error else ''}
+                        <form method="post">
+                            <input name="username" placeholder="Usuario" style="width:100%;margin-bottom:1em;padding:0.5em;">
+                            <input name="password" type="password" placeholder="Contraseña" style="width:100%;margin-bottom:1em;padding:0.5em;">
+                            <button type="submit" style="width:100%;padding:0.5em;background:#0e7490;color:white;border:none;">Entrar</button>
+                        </form>
+                    </div>
+                </body>
+            </html>
+            """)
+        else:
+            form = await request.form()
+            username = form.get("username")
+            password = form.get("password")
+            if username == ADMIN_USER and password == ADMIN_PASSWORD:
+                request.session["user"] = username
+                return RedirectResponse(url="/admin", status_code=302)
+            return RedirectResponse(url="/admin/login?error=Credenciales+incorrectas", status_code=302)
+
+    async def logout(self, request):
+        request.session.clear()
+        return RedirectResponse(url="/admin/login", status_code=302)
+
 # ==========================================
 # SQLAdmin Panel
 # ==========================================
-admin = Admin(app, engine, base_url="/admin")
+admin = CustomAdmin(
+    app,
+    engine,
+    base_url="/admin",
+    authentication_backend=OficitAuthBackend(secret_key="oficit-secret-key"),
+)
 
 # Importa y registra las vistas de SQLAdmin
-from app.admin.sqladmin_setup import register_admin_views
 register_admin_views(admin)
 
 def get_db():
