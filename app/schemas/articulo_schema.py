@@ -26,5 +26,12 @@ class ArticuloInDB(ArticuloBase):
     created_at: datetime = Field(...)
     updated_at: datetime = Field(...)
 
-class ArticuloResponse(ArticuloInDB):
-    pass
+class ArticuloResponse(BaseModel):
+    id: int
+    nombre: str
+    tipo: str
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
+
+    class Config:
+        from_attributes = True

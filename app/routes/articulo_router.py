@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.schemas.articulo_schema import ArticuloCreate, ArticuloResponse, ArticuloUpdate
+from app.schemas.composicion_pack_schema import ComposicionPackCreate, ComposicionPackResponse
 from ..services import get_ProductoCompuestoService, get_ProductoSimpleService, get_PackService
 from ..db import get_db
 
@@ -115,3 +116,52 @@ def eliminar_articulo(id: int, db: Session = Depends(get_db)):
     elif articulo.tipo == "pack":
         service = get_PackService()(db)
     return service.eliminar(id)
+
+@router.get("/pack/{id}", response_model=List[ComposicionPackResponse], responses={
+    200: {"description": "Lista de artículos en el pack con ID {id}"},
+    404: {"description": "Pack no encontrado"},
+    422: {"description": "Error de validación"}
+})
+def obtener_articulos_por_pack(id: int, db: Session = Depends(get_db)):
+    """
+    Obtiene los artículos que pertenecen a un pack por su ID.
+    """
+    service = get_PackService()(db)
+    articulos = service.obtener_articulos_por_pack(id)
+    return articulos
+
+@router.post("/pack/{id}", response_model=dict, responses={
+    200: {"description": "Artículos agregados al pack"},
+    400: {"description": "Artículo ya asociado al pack"},
+    404: {"description": "Pack no encontrado"},
+    422: {"description": "Error de validación"}
+})
+def agregar_articulos_a_pack(
+    id: int,
+    composiciones: List[ComposicionPackCreate],
+    db: Session = Depends(get_db)
+):
+    """
+    Agrega artículos a un pack.
+    Recibe una lista de objetos ComposicionPackCreate (con producto_id y cantidad).
+    """
+    service = get_PackService()(db)
+    return service.agregar_articulos_a_pack(id, composiciones)
+
+@router.delete("/pack/{id}", response_model=dict, responses={
+    200: {"description": "Artículos eliminados del pack"},
+    400: {"description": "Uno o más artículos no están asociados al pack"},
+    404: {"description": "Pack no encontrado"},
+    422: {"description": "Error de validación"}
+})
+def eliminar_articulos_de_pack(
+    id: int,
+    composiciones: List[int],
+    db: Session = Depends(get_db)
+):
+    """
+    Elimina artículos de un pack.
+    Recibe una lista de objetos ComposicionPackCreate (con producto_id).
+    """
+    service = get_PackService()(db)
+    return service.eliminar_articulos_de_pack(id, composiciones)
