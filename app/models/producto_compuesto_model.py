@@ -2,6 +2,8 @@ from typing import Optional, List
 from sqlalchemy import Integer, String, Text, Boolean, CheckConstraint, PrimaryKeyConstraint, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
+
+from app.models.composicion_prod_compuesto_model import ComposicionProdCompuesto
 from .base_model import Base
 import datetime
 
@@ -24,3 +26,6 @@ class ProductoCompuesto(Base):
     updated_at: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
 
     Composicion_Prod_Compuesto: Mapped[List['ComposicionProdCompuesto']] = relationship('ComposicionProdCompuesto', back_populates='Producto_Compuesto')
+
+    def __repr__(self):
+        return f"({self.id}) {self.nombre}"

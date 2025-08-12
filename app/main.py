@@ -12,7 +12,8 @@ import uvicorn
 from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-from app.db import SessionLocal
+from app.db import SessionLocal, engine
+from sqladmin import Admin
 
 # Importar todos los routers de rutas
 from app.routes.articulo_router import router as articulo_router
@@ -31,11 +32,12 @@ app = FastAPI(
     API RESTful para gestión integral de inventario con:
     - 👥 Familias y Colores: Organización por categorías
     - 🏢 Proveedores: Gestión de proveedores y contactos  
-    - 📦 Artículos: Catálogo base de productos
+    - 📦 Artículos: Catálogo base de productos (simples, compuestos y packs)
     - 🔧 Componentes: Elementos para productos compuestos
     - 🏷️ Productos: Simples y compuestos
     - 📊 Stock: Control de inventario y movimientos
     - 🎯 Coordinador: Operaciones complejas del inventario
+    - 🛠️ Panel de administración SQLAdmin en `/admin`
 
     ### Características:
     - ✅ CRUD completo para todas las entidades
@@ -43,6 +45,7 @@ app = FastAPI(
     - ✅ Validaciones de integridad
     - ✅ Reportes y análisis avanzados
     - ✅ Sistema de alertas de stock
+    - ✅ Panel de administración visual SQLAdmin
 
     ---
     ## 🔒 Licencia y uso
@@ -58,6 +61,15 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc"
 )
+
+# ==========================================
+# SQLAdmin Panel
+# ==========================================
+admin = Admin(app, engine, base_url="/admin")
+
+# Importa y registra las vistas de SQLAdmin
+from app.admin.sqladmin_setup import register_admin_views
+register_admin_views(admin)
 
 def get_db():
     """

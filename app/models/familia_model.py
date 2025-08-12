@@ -21,3 +21,6 @@ class Familia(Base):
 
     Articulo: Mapped[List['Articulo']] = relationship('Articulo', back_populates='Familia_')
     Color: Mapped[List['Color']] = relationship('Color', back_populates='Familia_')
+
+    def __repr__(self):
+        return f"({self.id}) {self.nombre}"

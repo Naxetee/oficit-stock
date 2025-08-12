@@ -28,3 +28,6 @@ class Stock(Base):
 
     Componente_: Mapped[Optional['Componente']] = relationship('Componente', back_populates='Stock')
     Producto_Simple: Mapped[Optional['ProductoSimple']] = relationship('ProductoSimple', back_populates='Stock')
+
+    def __repr__(self):
+        return f"({self.id}) {getattr(self, 'id_componente', '') or getattr(self, 'id_producto_simple', '')} - Cantidad: {self.cantidad}/{self.cantidad_minima}"

@@ -95,7 +95,7 @@ def agregar_componentes_a_producto_compuesto(
 ):
     """
     Agrega componentes a un producto compuesto.
-    Cada objeto debe tener id_prodCompuesto, id_componente y cantidad.
+    Cada objeto debe tener id_producto_compuesto, id_componente y cantidad.
     """
     service = get_ComponenteService()(db)
     return service.agregar_componentes_a_producto_compuesto(id, composiciones)

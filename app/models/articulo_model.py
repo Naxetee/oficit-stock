@@ -21,3 +21,6 @@ class Articulo(Base):
     activo: Mapped[Optional[bool]] = mapped_column(Boolean)
 
     Familia_: Mapped[Optional['Familia']] = relationship('Familia', back_populates='Articulo')
+
+    def __repr__(self):
+        return f"({self.id}) {self.nombre}"

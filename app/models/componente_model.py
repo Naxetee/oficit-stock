@@ -27,3 +27,6 @@ class Componente(Base):
     Proveedor_: Mapped[Optional['Proveedor']] = relationship('Proveedor', back_populates='Componente')
     Composicion_Prod_Compuesto: Mapped[List['ComposicionProdCompuesto']] = relationship('ComposicionProdCompuesto', back_populates='Componente_')
     Stock: Mapped[List['Stock']] = relationship('Stock', back_populates='Componente_')
+
+    def __repr__(self):
+        return f"({self.id}) {self.nombre}"

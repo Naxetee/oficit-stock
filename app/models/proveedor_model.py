@@ -24,3 +24,6 @@ class Proveedor(Base):
 
     Componente: Mapped[List['Componente']] = relationship('Componente', back_populates='Proveedor_')
     Producto_Simple: Mapped[List['ProductoSimple']] = relationship('ProductoSimple', back_populates='Proveedor_')
+
+    def __repr__(self):
+        return f"({self.id}) {self.nombre}"

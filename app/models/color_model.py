@@ -24,3 +24,6 @@ class Color(Base):
     Familia_: Mapped[Optional['Familia']] = relationship('Familia', back_populates='Color')
     Componente: Mapped[List['Componente']] = relationship('Componente', back_populates='Color_')
     Producto_Simple: Mapped[List['ProductoSimple']] = relationship('ProductoSimple', back_populates='Color_')
+
+    def __repr__(self):
+        return f"({self.id}) {self.nombre}"

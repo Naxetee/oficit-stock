@@ -80,7 +80,7 @@ def listar_movimientos(
     201: {"description": "Stock creado"},
     422: {"description": "Error de validación"}
 })
-def crear_stock(data: MovimientoCreate, db: Session = Depends(get_db)):
+def crear_movimiento(data: MovimientoCreate, db: Session = Depends(get_db)):
     movimiento_service = get_MovimientoService()(db)
     return movimiento_service.crear_movimiento(data)
 
