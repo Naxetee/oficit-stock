@@ -94,12 +94,14 @@ class TestComponenteCRUD:
             "tipo": "compuesto",
         }).json()
         prod_id = producto_compuesto["id"]
-        componentes = [comp1["id"], comp2["id"]]
+        componentes = [
+            {"id_componente": comp1["id"], "cantidad": 2},
+            {"id_componente": comp2["id"], "cantidad": 3}
+        ]
         
         # Asociamos los componentes al producto compuesto
-        resp = client.post(f"/componente/compuesto/{prod_id}", json={"componentes": componentes})
+        resp = client.post(f"/componente/compuesto/{prod_id}", json=componentes)
         assert resp.status_code == 200
-        assert resp.json()["detail"] == f"Componentes [{comp1['id']}, {comp2['id']}] agregados al producto compuesto exitosamente."
 
         # Obtenemos los componenetes
         resp = client.get(f"/componente/compuesto/{prod_id}")
@@ -108,3 +110,15 @@ class TestComponenteCRUD:
         assert len(componentes_resp) == 2
         assert componentes_resp[0]["id"] in [comp1["id"], comp2["id"]]
         assert componentes_resp[1]["id"] in [comp1["id"], comp2["id"]]
+
+        # Eliminamos los componentes del producto compuesto
+        resp = client.request(
+            "DELETE",
+            f"/componente/compuesto/{prod_id}",
+            json=[comp1["id"], comp2["id"]],
+        )
+        assert resp.status_code == 200
+        resp = client.get(f"/componente/compuesto/{prod_id}")
+        assert resp.status_code == 200
+        componentes_resp = resp.json()
+        assert len(componentes_resp) == 0

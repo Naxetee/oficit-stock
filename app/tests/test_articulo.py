@@ -68,7 +68,7 @@ class TestArticuloCRUD:
         assert res.status_code == 422
         
     def test_obtener_articulo_por_id(self):
-        data = {"nombre": "ArticuloX", "tipo": "simple"}
+        data = {"nombre": "ArticuloX", "tipo": "compuesto"}
         res = client.post("/articulo/", json=data)
         art_id = res.json()["id"]
         res = client.get(f"/articulo/{art_id}")

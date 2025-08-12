@@ -3,8 +3,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.params import Query
 from sqlalchemy.orm import Session
 from ..schemas.componente_schema import ComponenteResponse, ComponenteCreate, ComponenteUpdate
+from ..schemas.composicion_producto_compuesto_schema import ComposicionProdCompuesto, ComposicionProdCompuestoCreate
 from ..services import get_ComponenteService
 from ..db import get_db
+from typing import Tuple
 
 router = APIRouter(prefix="/componente", tags=["Componente"])
 
@@ -70,7 +72,7 @@ def delete(id: int, db: Session = Depends(get_db)):
     service = get_ComponenteService()(db)
     return service.eliminar(id)
 
-@router.get("/compuesto/{id}", response_model=List[ComponenteResponse], responses={
+@router.get("/compuesto/{id}", response_model=Optional[List[ComponenteResponse]], responses={
     200: {"description": "Lista de componentes del producto compuesto"},
     404: {"description": "Producto compuesto no encontrado"},
     422: {"description": "Error de validación"}
@@ -78,18 +80,40 @@ def delete(id: int, db: Session = Depends(get_db)):
 def get_componente_by_producto_compuesto(id: int, db: Session = Depends(get_db)):
     service = get_ComponenteService()(db)
     result = service.obtener_componentes_por_producto_compuesto(id)
-    if not result:
-        raise HTTPException(status_code=404, detail="Producto compuesto no encontrado")
     return result
 
 @router.post("/compuesto/{id}", response_model=dict, responses={
     200: {"description": "Componentes agregados al producto compuesto"},
+    400: {"description": "Componente ya asociado al producto compuesto"},
     404: {"description": "Producto compuesto no encontrado"},
     422: {"description": "Error de validación"}
 })
-def agregar_componentes_a_producto_compuesto(id: int, componentes: List[int], db: Session = Depends(get_db)):
+def agregar_componentes_a_producto_compuesto(
+    id: int,
+    composiciones: List[ComposicionProdCompuestoCreate],
+    db: Session = Depends(get_db)
+):
     """
     Agrega componentes a un producto compuesto.
+    Cada objeto debe tener id_prodCompuesto, id_componente y cantidad.
     """
     service = get_ComponenteService()(db)
-    return service.agregar_componentes_a_producto_compuesto(id, componentes)
+    return service.agregar_componentes_a_producto_compuesto(id, composiciones)
+
+@router.delete("/compuesto/{id}", response_model=dict, responses={
+    200: {"description": "Componentes eliminados del producto compuesto"},
+    400: {"description": "Uno o más componentes no están asociados al producto compuesto"},
+    404: {"description": "Producto compuesto no encontrado"},
+    422: {"description": "Error de validación"}
+})
+def eliminar_componentes_de_producto_compuesto(
+    id: int,
+    composiciones: List[int],
+    db: Session = Depends(get_db)
+):
+    """
+    Elimina componentes de un producto compuesto.
+    Recibe una lista de objetos ComposicionProdCompuesto.
+    """
+    service = get_ComponenteService()(db)
+    return service.eliminar_componentes_de_producto_compuesto(id, composiciones)

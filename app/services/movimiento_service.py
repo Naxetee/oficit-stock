@@ -7,6 +7,7 @@ from app.models.movimiento_model import Movimiento
 from app.models.stock_model import Stock
 from app.models.producto_simple_model import ProductoSimple
 from app.models.componente_model import Componente
+from app.schemas.stock_schema import StockResponse
 from .BaseService import BaseService
 
 class MovimientoService(BaseService):
@@ -51,7 +52,7 @@ class MovimientoService(BaseService):
         self.db.flush()
         return st
 
-    def crear_movimiento(self, data: MovimientoCreate):
+    def crear_movimiento(self, data: MovimientoCreate) -> StockResponse:
         # Validación de referencia: exactamente uno de los dos
         if bool(data.id_producto_simple) == bool(data.id_componente):
             raise HTTPException(status_code=422, detail="Indica exactamente uno: id_producto_simple o id_componente")

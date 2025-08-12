@@ -41,8 +41,6 @@ def listar_stock(
 def obtener_stock_por_componente(id: int, db: Session = Depends(get_db)):
     service = get_StockService()(db)
     result = service.obtener_por_id_componente(id)
-    if not result:
-        raise HTTPException(status_code=404, detail=f"Stock no encontrado para el componente (ID {id})")
     return result
 
 @router.get("/producto_simple/{id}", response_model=StockResponse, responses={
@@ -53,8 +51,6 @@ def obtener_stock_por_componente(id: int, db: Session = Depends(get_db)):
 def obtener_stock_por_producto_simple(id: int, db: Session = Depends(get_db)):
     service = get_StockService()(db)
     result = service.obtener_por_id_producto_simple(id)
-    if not result:
-        raise HTTPException(status_code=404, detail=f"Stock no encontrado para el producto simple (ID {id})")
     return result
 
 @router.get("/movimiento", response_model=List[MovimientoResponse], responses={
