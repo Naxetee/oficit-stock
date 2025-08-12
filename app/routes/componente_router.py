@@ -43,7 +43,7 @@ def get_by_id(id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Componente no encontrado")
     return result
 
-@router.post("/", response_model=ComponenteResponse, responses={
+@router.post("/", response_model=ComponenteResponse, status_code=201, responses={
     201: {"description": "Componente creado"},
     422: {"description": "Error de validación"}
 })
@@ -59,8 +59,6 @@ def create(data: ComponenteCreate, db: Session = Depends(get_db)):
 def update(id: int, data: ComponenteUpdate, db: Session = Depends(get_db)):
     service = get_ComponenteService()(db)
     result = service.actualizar(id, data)
-    if not result:
-        raise HTTPException(status_code=404, detail="Componente no encontrado")
     return result
 
 @router.delete("/{id}", responses={
@@ -83,3 +81,15 @@ def get_componente_by_producto_compuesto(id: int, db: Session = Depends(get_db))
     if not result:
         raise HTTPException(status_code=404, detail="Producto compuesto no encontrado")
     return result
+
+@router.post("/compuesto/{id}", response_model=dict, responses={
+    200: {"description": "Componentes agregados al producto compuesto"},
+    404: {"description": "Producto compuesto no encontrado"},
+    422: {"description": "Error de validación"}
+})
+def agregar_componentes_a_producto_compuesto(id: int, componentes: List[int], db: Session = Depends(get_db)):
+    """
+    Agrega componentes a un producto compuesto.
+    """
+    service = get_ComponenteService()(db)
+    return service.agregar_componentes_a_producto_compuesto(id, componentes)

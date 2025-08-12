@@ -28,7 +28,7 @@ def get_by_id(id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Proveedor no encontrado")
     return result
 
-@router.post("/", response_model=ProveedorResponse, responses={
+@router.post("/", response_model=ProveedorResponse, status_code=201, responses={
     201: {"description": "Proveedor creado"},
     400: {"description": "Error de petición"},
     422: {"description": "Error de validación"}
@@ -46,8 +46,6 @@ def create(data: ProveedorCreate, db: Session = Depends(get_db)):
 def update(id: int, data: ProveedorUpdate, db: Session = Depends(get_db)):
     service = get_ProveedorService()(db)
     result = service.actualizar(id, data)
-    if not result:
-        raise HTTPException(status_code=404, detail="Proveedor no encontrado")
     return result
 
 @router.delete("/{id}", responses={

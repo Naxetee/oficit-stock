@@ -26,7 +26,7 @@ def get_by_id(id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Familia no encontrada")
     return result
 
-@router.post("/", response_model=FamiliaResponse, responses={
+@router.post("/", response_model=FamiliaResponse, status_code=201, responses={
     201: {"description": "Familia creada"},
     422: {"description": "Error de validación"}
 })
@@ -42,8 +42,6 @@ def create(data: FamiliaCreate, db: Session = Depends(get_db)):
 def update(id: int, data: FamiliaUpdate, db: Session = Depends(get_db)):
     service = get_FamiliaService()(db)
     result = service.actualizar(id, data)
-    if not result:
-        raise HTTPException(status_code=404, detail="Familia no encontrada")
     return result
 
 @router.delete("/{id}", responses={

@@ -8,12 +8,6 @@ class ComponenteBase(BaseModel):
     id_proveedor: Optional[int] = Field(None, ge=1)
     id_color: Optional[int] = Field(None, ge=1)
 
-    @field_validator('nombre')
-    def validate_nombre(cls, v):
-        if not v or not v.strip():
-            raise ValueError("El nombre del componente no puede estar vacío")
-        return v
-
 class ComponenteCreate(ComponenteBase):
     pass
 

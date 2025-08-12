@@ -6,12 +6,6 @@ class FamiliaBase(BaseModel):
     nombre: str = Field(..., min_length=1, max_length=127)
     descripcion: Optional[str] = Field(None, max_length=255)
 
-    @field_validator('nombre')
-    def validate_nombre(cls, v):
-        if not v or not v.strip():
-            raise ValueError("El nombre de la familia no puede estar vacío")
-        return v
-
 class FamiliaCreate(FamiliaBase):
     pass
 

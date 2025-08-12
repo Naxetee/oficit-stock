@@ -21,7 +21,6 @@ from app.routes.familia_router import router as familia_router
 from app.routes.proveedor_router import router as proveedor_router
 from app.routes.color_router import router as color_router
 from app.routes.componente_router import router as componente_router
-from app.routes.articulo_router import router as articulo_router
 
 # Configuración de la aplicación
 app = FastAPI(
@@ -60,13 +59,6 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
-@app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request, exc):
-    return JSONResponse(
-        status_code=400,
-        content={"detail": "Datos inválidos en la petición"}
-    )
-
 def get_db():
     """
     🔌 Dependencia para obtener sesión de base de datos
@@ -94,11 +86,11 @@ def read_root():
         "documentacion": app.docs_url,
         "estado_del_sistema": "/health",
         "endpoints_disponibles": {
-            "familias": "/familia",
-            "colores": "/color",
-            "proveedores": "/proveedor",
-            "componentes": "/componente",
-            "articulos": "/articulos"
+            "familia": "/familia",
+            "color": "/color",
+            "proveedor": "/proveedor",
+            "componente": "/componente",
+            "articulo": "/articulo"
         }
     }
 

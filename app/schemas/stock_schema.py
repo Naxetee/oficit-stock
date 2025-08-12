@@ -27,4 +27,6 @@ class StockInDB(StockBase):
     updated_at: datetime = Field(...)
 
 class StockResponse(StockInDB):
+    class Config: 
+        from_attributes = True
     pass

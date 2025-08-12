@@ -10,7 +10,7 @@ router = APIRouter(prefix="/color", tags=["Color"])
     200: {"description": "Lista de colores"},
     422: {"description": "Error de validación"}
 })
-def get_all(db: Session = Depends(get_db)):
+def listar_colores(db: Session = Depends(get_db)):
     service = get_ColorService()(db)
     return service.obtener_todos()
 
@@ -26,7 +26,7 @@ def get_by_id(id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Color no encontrado")
     return result
 
-@router.post("/", response_model=ColorResponse, responses={
+@router.post("/", response_model=ColorResponse, status_code=201, responses={
     201: {"description": "Color creado"},
     422: {"description": "Error de validación"}
 })
@@ -41,10 +41,7 @@ def create(data: ColorCreate, db: Session = Depends(get_db)):
 })
 def update(id: int, data: ColorUpdate, db: Session = Depends(get_db)):
     service = get_ColorService()(db)
-    result = service.actualizar(id, data)
-    if not result:
-        raise HTTPException(status_code=404, detail="Color no encontrado")
-    return result
+    return service.actualizar(id, data)
 
 @router.delete("/{id}", responses={
     200: {"description": "Color eliminado"},

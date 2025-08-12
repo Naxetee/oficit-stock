@@ -134,3 +134,11 @@ class BaseService:
         except Exception as e:
             self.db.rollback()
             raise HTTPException(status_code=400, detail=f"Error inesperado al eliminar {self.model.__name__} id={id}: {str(e)}")
+
+    def contar(self) -> int:
+        """
+        Cuenta el número total de registros del modelo.
+        Returns:
+            int: El número total de registros.
+        """
+        return self.db.query(self.model).count()

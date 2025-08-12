@@ -6,7 +6,7 @@ from app.schemas.articulo_schema import ArticuloCreate, ArticuloResponse, Articu
 from ..services import get_ProductoCompuestoService, get_ProductoSimpleService, get_PackService
 from ..db import get_db
 
-router = APIRouter(prefix="/articulos", tags=["Articulos"])
+router = APIRouter(prefix="/articulo", tags=["Articulo"])
 
 @router.get("/", response_model=Dict[str, List[ArticuloResponse]], responses={
     200: {"description": "Lista de artículos"},
@@ -65,7 +65,7 @@ def obtener_articulo_por_id(id: int, db: Session = Depends(get_db)):
 
     raise HTTPException(status_code=404, detail="Artículo no encontrado")
 
-@router.post("/", response_model=ArticuloResponse, responses={
+@router.post("/", response_model=ArticuloResponse, status_code=201, responses={
     201: {"description": "Artículo creado"},
     422: {"description": "Error de validación"}
 })
@@ -79,9 +79,6 @@ def crear_articulo(data: ArticuloCreate, db: Session = Depends(get_db)):
         service = get_ProductoSimpleService()(db)
     elif data.tipo == "pack":
         service = get_PackService()(db)
-    else:
-        raise HTTPException(status_code=400, detail="Tipo de artículo no válido")
-
     return service.crear(data)
 
 @router.put("/{id}", response_model=ArticuloResponse, responses={
@@ -99,15 +96,8 @@ def actualizar_articulo(id: int, data: ArticuloUpdate, db: Session = Depends(get
         service = get_ProductoSimpleService()(db)
     elif data.tipo == "pack":
         service = get_PackService()(db)
-    else:
-        raise HTTPException(status_code=400, detail="Tipo de artículo no válido")
-
-    result = service.actualizar(id, data)
-    if not result:
-        raise HTTPException(status_code=404, detail="Artículo no encontrado")
+    return service.actualizar(id, data)
     
-    return result
-
 @router.delete("/{id}", responses={
     200: {"description": "Artículo eliminado"},
     404: {"description": "Artículo no encontrado"},
@@ -124,7 +114,4 @@ def eliminar_articulo(id: int, db: Session = Depends(get_db)):
         service = get_ProductoSimpleService()(db)
     elif articulo.tipo == "pack":
         service = get_PackService()(db)
-    else:
-        raise HTTPException(status_code=400, detail="Tipo de artículo no válido")
-    result = service.eliminar(id)
-    return {"detail": "Artículo eliminado correctamente"}
+    return service.eliminar(id)

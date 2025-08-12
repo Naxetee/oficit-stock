@@ -57,7 +57,7 @@ def obtener_stock_por_producto_simple(id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail=f"Stock no encontrado para el producto simple (ID {id})")
     return result
 
-@router.get("/movimientos", response_model=List[MovimientoResponse], responses={
+@router.get("/movimiento", response_model=List[MovimientoResponse], responses={
     200: {"description": "Lista de movimientos"},
     422: {"description": "Error de validación"}
 })
@@ -80,7 +80,7 @@ def listar_movimientos(
         }
     )
 
-@router.post("/movimiento", response_model=StockResponse, responses={
+@router.post("/movimiento", response_model=StockResponse, status_code=201, responses={
     201: {"description": "Stock creado"},
     422: {"description": "Error de validación"}
 })
