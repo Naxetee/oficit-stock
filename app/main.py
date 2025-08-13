@@ -5,23 +5,19 @@ Aplicación principal que coordina todos los endpoints del sistema de inventario
 Organizada por modelos con rutas específicas para cada entidad.
 """
 
-from fastapi.exceptions import RequestValidationError
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 import uvicorn
 from dotenv import load_dotenv
 import os
 
-from fastapi import FastAPI, Depends, Request, Form
+from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-from app.db import SessionLocal, engine
-from sqladmin import Admin
+from app.db import engine
 from fastapi.staticfiles import StaticFiles
-from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.authentication import (
-    AuthenticationBackend, AuthCredentials, SimpleUser, UnauthenticatedUser
+    AuthenticationBackend
 )
-from starlette.requests import HTTPConnection
 from starlette.middleware.sessions import SessionMiddleware
 
 # Importar todos los routers de rutas
@@ -32,6 +28,9 @@ from app.routes.proveedor_router import router as proveedor_router
 from app.routes.color_router import router as color_router
 from app.routes.componente_router import router as componente_router
 from app.admin.sqladmin_setup import CustomAdmin, register_admin_views
+
+# Importar la función get_db para inyección de dependencias
+from app.db import get_db
 
 # Configuración de la aplicación
 app = FastAPI(
@@ -66,7 +65,6 @@ app = FastAPI(
     contact={
         "name": "Tienda Oficit SLU",
     },
-    # Ocultar 422 globalmente
     openapi_url="/openapi.json",
     docs_url="/docs",
     redoc_url="/redoc"
@@ -74,6 +72,9 @@ app = FastAPI(
 
 # Añade soporte de sesiones
 app.add_middleware(SessionMiddleware, secret_key="oficit-secret-key")
+
+# Montar la carpeta de archivos estáticos
+app.mount("/static", StaticFiles(directory="app/admin/static"), name="static")
 
 # ==========================================
 # AUTENTICACIÓN PARA ADMIN
@@ -139,18 +140,21 @@ admin = CustomAdmin(
     authentication_backend=OficitAuthBackend(secret_key="oficit-secret-key"),
 )
 
+
 # Importa y registra las vistas de SQLAdmin
 register_admin_views(admin)
 
-def get_db():
-    """
-    🔌 Dependencia para obtener sesión de base de datos
-    """
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+# ====
+
+# Favicon handler para evitar 404 de navegadores
+from fastapi.responses import FileResponse
+
+@app.get("/favicon.ico")
+def favicon():
+    return FileResponse("app/admin/static/favicon.ico")
+
+# ENDPOINT RAÍZ
+# ====
 
 # ==========================================
 # ENDPOINT RAÍZ
